@@ -1,4 +1,5 @@
 require 'sinatra/base'
+require 'rqrcode'
 require 'sqrl/opaque_nut'
 require 'sqrl/url'
 require 'sqrl/login_request'
@@ -13,8 +14,10 @@ module SQRL
 
       get '/' do
         nut = SQRL::OpaqueNut.new.to_s
+        auth_url = SQRL::URL.new(request.host+'/sqrl', nut).to_s
         erb :index, :locals => {
-          :auth_url => SQRL::URL.new(request.host+'/sqrl', nut)
+          :auth_url => auth_url,
+          :qr => RQRCode::QRCode.new(auth_url, :size => 10)
         }
       end
 

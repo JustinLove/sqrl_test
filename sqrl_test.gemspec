@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_runtime_dependency "sqrl_auth"
+  spec.add_runtime_dependency "rqrcode"
   spec.add_runtime_dependency "sinatra"
   spec.add_runtime_dependency "thin"
 

@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'sqrl/opaque_nut'
 require 'sqrl/url'
+require 'sqrl/login_request'
 
 module SQRL
   module Test
@@ -13,7 +14,14 @@ module SQRL
       get '/' do
         nut = SQRL::OpaqueNut.new.to_s
         erb :index, :locals => {
-          :auth_url => SQRL::URL.new('example.com/sqrl', nut)
+          :auth_url => SQRL::URL.new(request.host+'/sqrl', nut)
+        }
+      end
+
+      post '/sqrl' do
+        req = SQRL::LoginRequest.new(request.body.read)
+        erb :report, :locals => {
+          :req => req
         }
       end
     end

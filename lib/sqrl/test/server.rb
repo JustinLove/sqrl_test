@@ -6,6 +6,13 @@ require 'sqrl/login_request'
 
 module SQRL
   module Test
+    RequestProperties = %w[
+      params
+      server_string
+      client_data
+      message
+      valid?
+    ]
     class Server < Sinatra::Base
       configure do 
         mime_type :ics, 'text/calendar'
@@ -23,8 +30,10 @@ module SQRL
 
       post '/sqrl' do
         req = SQRL::LoginRequest.new(request.body.read)
+        props = Hash[RequestProperties.map {|prop| [prop, req.__send__(prop)]}]
         erb :report, :locals => {
-          :req => req
+          :req => req,
+          :props => props
         }
       end
     end

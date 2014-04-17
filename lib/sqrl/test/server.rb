@@ -21,7 +21,7 @@ module SQRL
 
       get '/' do
         nut = SQRL::ReversibleNut.new(ENV['SERVER_KEY'], request.ip).to_s
-        auth_url = SQRL::URL.new(request.host+':'+request.port.to_s+'/sqrl', nut).to_s
+        auth_url = SQRL::URL.qrl(request.host+':'+request.port.to_s+'/sqrl', nut).to_s
         erb :index, :locals => {
           :auth_url => auth_url,
           :qr => RQRCode::QRCode.new(auth_url, :size => 10)

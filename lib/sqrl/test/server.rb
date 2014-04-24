@@ -3,6 +3,7 @@ require 'rqrcode'
 require 'sqrl/reversible_nut'
 require 'sqrl/url'
 require 'sqrl/login_request'
+require 'sqrl/login_response'
 
 module SQRL
   module Test
@@ -28,7 +29,7 @@ module SQRL
         }
       end
 
-      post '/sqrl' do
+      post '/sqrl.html' do
         nut = SQRL::ReversibleNut.reverse(ENV['SERVER_KEY'], params[:nut])
         req = SQRL::LoginRequest.new(request.body.read)
         props = Hash[RequestProperties.map {|prop| [prop, req.__send__(prop)]}]
@@ -41,6 +42,22 @@ module SQRL
           :req => req,
           :props => props
         }
+      end
+
+      post '/sqrl' do
+        req_nut = SQRL::ReversibleNut.reverse(ENV['SERVER_KEY'], params[:nut])
+        req = SQRL::LoginRequest.new(request.body.read)
+        res_nut = req_nut.response_nut
+        invalid = !req.valid?
+        flags =  {
+          :ip_match => request.ip == req_nut.ip,
+          :command_failed => invalid,
+          :sqrl_failure => invalid,
+        }
+        response = SQRL::LoginResponse.new(res_nut, flags, {
+          :sfn => 'SQRL::Test',
+        }.merge(flags))
+        response.response_body
       end
     end
   end

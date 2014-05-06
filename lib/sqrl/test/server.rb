@@ -61,12 +61,12 @@ module SQRL
         commands = Commands.new(req_nut.ip)
 
         req.commands.each do |command|
-          commands.execute(command)
+          commands.receive(command)
         end
 
-        if commands.unrecognized.length > 0
+        if commands.unrecognized?
           sqrl_failure = command_failed = true
-        elsif commands.executed != commands.recognized
+        elsif commands.unexecuted?
           command_failed = true
         end
 

@@ -1,10 +1,8 @@
 require 'sinatra/base'
 require 'rqrcode'
-require 'sqrl/test/commands'
+require 'sqrl/test/response'
 require 'sqrl/reversible_nut'
 require 'sqrl/url'
-require 'sqrl/authentication_query_parser'
-require 'sqrl/authentication_response_generator'
 
 $sessions = []
 
@@ -53,39 +51,9 @@ module SQRL
       end
 
       post '/sqrl' do
-        req_nut = SQRL::ReversibleNut.reverse(ENV['SERVER_KEY'], params[:nut])
-        req = SQRL::AuthenticationQueryParser.new(request.body.read)
-        valid = req.valid?
-        command_failed = !valid
-        sqrl_failure = !valid
-        commands = Commands.new(req_nut.ip)
-
-        req.commands.each do |command|
-          commands.receive(command)
-        end
-
-        if commands.unrecognized?
-          sqrl_failure = command_failed = true
-        elsif commands.unexecuted?
-          command_failed = true
-        end
-
-        res_nut = req_nut.response_nut
-        flags =  {
-          :ip_match => request.ip == req_nut.ip,
-          :command_failed => command_failed,
-          :sqrl_failure => sqrl_failure,
-          :logged_in => $sessions.include?(req_nut.ip),
-        }
-        response = SQRL::AuthenticationResponseGenerator.new(res_nut, flags, {
-          :sfn => 'SQRL::Test',
-          :signature_valid => valid,
-          :recognized_commands => commands.recognized.join(','),
-          :unrecognized_commands => commands.unrecognized.join(','),
-          :executed_commands => commands.executed.join(','),
-          :sessions => $sessions.join(','),
-        }.merge(flags))
-        response.response_body
+        response = Response.new(request.body.read, request.ip, params[:nut])
+        response.execute_commands
+        return response.response_body
       end
     end
   end

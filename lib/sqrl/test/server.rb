@@ -83,7 +83,7 @@ module SQRL
           case command
           when 'login'
             executed_commands << command
-            $sessions << req_nut.ip
+            $sessions |= [req_nut.ip]
           end
         end
 
@@ -106,7 +106,7 @@ module SQRL
           :recognized_commands => recognized_commands.join(','),
           :unrecognized_commands => unrecognized_commands.join(','),
           :executed_commands => executed_commands.join(','),
-          :sessions => $sessions,
+          :sessions => $sessions.join(','),
         }.merge(flags))
         response.response_body
       end

@@ -1,21 +1,10 @@
 require 'sinatra/base'
 require 'rqrcode'
+require 'sqrl/test/commands'
 require 'sqrl/reversible_nut'
 require 'sqrl/url'
 require 'sqrl/authentication_query_parser'
 require 'sqrl/authentication_response_generator'
-
-COMMANDS = %w[
-  setkey
-  setlock
-  disable
-  enable
-  delete
-  create
-  login
-  logme
-  logoff
-]
 
 $sessions = []
 
@@ -69,27 +58,15 @@ module SQRL
         valid = req.valid?
         command_failed = !valid
         sqrl_failure = !valid
-        executed_commands = []
-        recognized_commands = []
-        unrecognized_commands = []
+        commands = Commands.new(req_nut.ip)
 
         req.commands.each do |command|
-          if COMMANDS.include?(command)
-            recognized_commands << command
-          else
-            unrecognized_commands << command
-          end
-
-          case command
-          when 'login'
-            executed_commands << command
-            $sessions |= [req_nut.ip]
-          end
+          commands.execute(command)
         end
 
-        if unrecognized_commands.length > 0
+        if commands.unrecognized.length > 0
           sqrl_failure = command_failed = true
-        elsif executed_commands != recognized_commands
+        elsif commands.executed != commands.recognized
           command_failed = true
         end
 
@@ -103,9 +80,9 @@ module SQRL
         response = SQRL::AuthenticationResponseGenerator.new(res_nut, flags, {
           :sfn => 'SQRL::Test',
           :signature_valid => valid,
-          :recognized_commands => recognized_commands.join(','),
-          :unrecognized_commands => unrecognized_commands.join(','),
-          :executed_commands => executed_commands.join(','),
+          :recognized_commands => commands.recognized.join(','),
+          :unrecognized_commands => commands.unrecognized.join(','),
+          :executed_commands => commands.executed.join(','),
           :sessions => $sessions.join(','),
         }.merge(flags))
         response.response_body

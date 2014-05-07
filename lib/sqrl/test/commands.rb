@@ -1,7 +1,8 @@
 module SQRL
   module Test
     class Commands
-      def initialize(login_ip)
+      def initialize(req, login_ip)
+        @req = req
         @login_ip = login_ip
         @executed = []
         @recognized = []
@@ -38,7 +39,7 @@ module SQRL
       end
 
       def login
-        ServerSession.login(@login_ip)
+        ServerSession.login(@login_ip, @req.idk)
         true
       end
 

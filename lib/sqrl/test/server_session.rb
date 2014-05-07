@@ -10,11 +10,11 @@ module SQRL
       end
 
       def list
-        $server_sessions.map {|s| s[:ip]}.join(',')
+        $server_sessions.join(',')
       end
 
-      def login(ip)
-        $server_sessions << {:ip => ip}
+      def login(ip, idk)
+        $server_sessions << {:ip => ip, :idk => idk}
       end
     end
   end

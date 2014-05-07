@@ -4,5 +4,11 @@
   </head>
   <body>
     <p>Logged In</p>
+    <ul>
+    <% props.each do |name, value| %>
+      <li><span class="property"><%= name %></span>:
+        <span class="value"><%= value %></span></li>
+    <% end %>
+    </ul>
   </body>
 </html>

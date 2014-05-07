@@ -1,4 +1,5 @@
 require 'sqrl/test/commands'
+require 'sqrl/test/server_session'
 require 'sqrl/authentication_query_parser'
 require 'sqrl/authentication_response_generator'
 
@@ -18,6 +19,10 @@ module SQRL
         @req.valid?
       end
 
+      def logged_in?
+        !!ServerSession.for_ip(@req_nut.ip)
+      end
+
       def execute_commands
         @req.commands.each do |command|
           @commands.receive(command)
@@ -35,7 +40,7 @@ module SQRL
           :ip_match => @request_ip == @req_nut.ip,
           :command_failed => @command_failed,
           :sqrl_failure => @sqrl_failure,
-          :logged_in => $sessions.include?(@req_nut.ip),
+          :logged_in => logged_in?,
         }
       end
 
@@ -47,7 +52,7 @@ module SQRL
           :recognized_commands => @commands.recognized.join(','),
           :unrecognized_commands => @commands.unrecognized.join(','),
           :executed_commands => @commands.executed.join(','),
-          :sessions => $sessions.join(','),
+          :sessions => ServerSession.list,
         }.merge(flags))
         response.response_body
       end

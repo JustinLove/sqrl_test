@@ -4,8 +4,6 @@ require 'sqrl/test/response'
 require 'sqrl/reversible_nut'
 require 'sqrl/url'
 
-$sessions = []
-
 module SQRL
   module Test
     RequestProperties = %w[
@@ -16,6 +14,8 @@ module SQRL
       valid?
     ]
     class Server < Sinatra::Base
+      enable :session
+
       configure do 
         mime_type :ics, 'text/calendar'
         STDOUT.sync = true
@@ -24,7 +24,7 @@ module SQRL
       get '/' do
         nut = SQRL::ReversibleNut.new(ENV['SERVER_KEY'], request.ip).to_s
         auth_url = SQRL::URL.qrl(request.host+':'+request.port.to_s+'/sqrl', nut).to_s
-        if $sessions.include?(request.ip)
+        if ServerSession.for_ip(request.ip)
           erb :logged_in
         else
           erb :index, :locals => {

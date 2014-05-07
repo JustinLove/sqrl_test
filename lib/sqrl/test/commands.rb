@@ -38,7 +38,7 @@ module SQRL
       end
 
       def login
-        $sessions |= [@login_ip]
+        ServerSession.login(@login_ip)
         true
       end
 

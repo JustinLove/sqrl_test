@@ -2,28 +2,47 @@ require 'sqrl/test/commands'
 require 'sqrl/test/server_session'
 require 'sqrl/authentication_query_parser'
 require 'sqrl/authentication_response_generator'
+require 'sqrl/opaque_nut'
 
 module SQRL
   module Test
     class Response
-      def initialize(request_body, request_ip, nut)
+      def initialize(request_body, request_ip, param_nut)
         @request_ip = request_ip
-        @req_nut = SQRL::ReversibleNut.reverse(ENV['SERVER_KEY'], nut)
+        @param_nut = param_nut
         @req = SQRL::AuthenticationQueryParser.new(request_body)
         @command_failed = !valid?
         @sqrl_failure = !valid?
-        @commands = Commands.new(@req, @req_nut.ip)
+        @commands = Commands.new(@req, login_ip)
       end
 
       def valid?
         @req.valid?
       end
 
+      def session
+        @session ||= ServerSession.for_idk(@req.idk)
+      end
+
+      def login_ip
+        if @param_nut
+          SQRL::ReversibleNut.reverse(ENV['SERVER_KEY'], @param_nut).ip
+        elsif session
+          session[:ip]
+        else
+          @request_ip
+        end
+      end
+
       def logged_in?
-        !!ServerSession.for_ip(@req_nut.ip)
+        session && session[:status] == :logged_in
       end
 
       def execute_commands
+        return unless valid?
+
+        ServerSession.assert(login_ip, @req.idk, @param_nut)
+
         @req.commands.each do |command|
           @commands.receive(command)
         end
@@ -37,7 +56,7 @@ module SQRL
 
       def flags
         @flags ||= {
-          :ip_match => @request_ip == @req_nut.ip,
+          :ip_match => @request_ip == login_ip,
           :command_failed => @command_failed,
           :sqrl_failure => @sqrl_failure,
           :logged_in => logged_in?,
@@ -45,7 +64,7 @@ module SQRL
       end
 
       def response_body
-        res_nut = @req_nut.response_nut
+        res_nut = SQRL::OpaqueNut.new
         response = SQRL::AuthenticationResponseGenerator.new(res_nut, flags, {
           :sfn => 'SQRL::Test',
           :signature_valid => valid?,
@@ -53,6 +72,8 @@ module SQRL
           :unrecognized_commands => @commands.unrecognized.join(','),
           :executed_commands => @commands.executed.join(','),
           :sessions => ServerSession.list,
+          :request_ip => @request_ip,
+          :login_ip => login_ip
         }.merge(flags))
         response.response_body
       end

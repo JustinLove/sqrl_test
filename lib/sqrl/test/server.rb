@@ -43,9 +43,12 @@ module SQRL
         props['signature valid'] = req.valid?
         props['secure?'] = request.secure?
         props['post ip'] = request.ip
+        props['url'] = request.url
+        props['fullpath'] = request.fullpath
         props['nut'] = params[:nut]
         props['login ip'] = nut.ip
         props['age'] = nut.age
+        props['methods'] = request.methods.sort - Object.instance_methods
         erb :report, :locals => {
           :req => req,
           :props => props

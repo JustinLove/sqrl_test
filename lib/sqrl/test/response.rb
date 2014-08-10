@@ -63,7 +63,7 @@ module SQRL
         }
       end
 
-      def response_body
+      def response
         res_nut = SQRL::OpaqueNut.new
         response = SQRL::AuthenticationResponseGenerator.new(res_nut, flags, {
           :sfn => 'SQRL::Test',
@@ -75,7 +75,14 @@ module SQRL
           :request_ip => @request_ip,
           :login_ip => login_ip
         }.merge(flags))
+      end
+
+      def response_body
         response.response_body
+      end
+
+      def server_string
+        response.server_string
       end
     end
   end

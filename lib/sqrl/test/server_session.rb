@@ -14,7 +14,11 @@ module SQRL
       end
 
       def list
-        $server_sessions.join(',')
+        $server_sessions.map{|s|
+          x = s.dup
+          x[:idk] = Base64.urlsafe_encode64(s[:idk])
+          x
+        }.join(',')
       end
 
       def assert(ip, idk, nut)

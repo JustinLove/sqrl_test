@@ -58,6 +58,7 @@ module SQRL
       post '/sqrl' do
         response = Response.new(request.body.read, request.ip, params[:nut])
         response.execute_commands
+        puts response.response_body
         return response.response_body
       end
     end

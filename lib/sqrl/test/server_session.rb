@@ -16,8 +16,8 @@ module SQRL
       def list
         $server_sessions.map{|s|
           x = s.dup
-          x[:idk] = Base64.urlsafe_encode64(s[:idk])
-          x
+          x[:idk] = Base64.urlsafe_encode64(s[:idk]).sub(/=*\z/, '')
+          x.map {|k,v| [k,v].join(':')}.join(', ')
         }.join(',')
       end
 

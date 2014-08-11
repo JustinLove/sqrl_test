@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/JustinLove/sqrl_auth.git
-  revision: d8586b8a45250e41762091c26ce66276fce435c5
+  revision: b5d9956d5fdd9414f50a52cc06381376c1ea5314
   branch: master
   specs:
     sqrl_auth (0.0.1)
@@ -60,7 +60,7 @@ GEM
     rack (1.5.2)
     rack-protection (1.5.2)
       rack
-    rake (10.2.2)
+    rake (10.3.2)
     rb-fsevent (0.9.4)
     rb-inotify (0.9.3)
       ffi (>= 0.5.0)

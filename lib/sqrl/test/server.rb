@@ -27,7 +27,8 @@ module SQRL
         if params[:tif_base]
           auth_url += '&tif_base=' + params[:tif_base]
         end
-        if ss = ServerSession.for_ip(request.ip)
+        ss = ServerSession.for_ip(request.ip)
+        if ss && ss[:status] == :logged_in
           erb :logged_in, :locals => {
             :props => ss,
           }
@@ -37,6 +38,13 @@ module SQRL
             :qr => RQRCode::QRCode.new(auth_url, :size => 10),
           }
         end
+      end
+
+      get '/logout' do
+        if ss = ServerSession.for_ip(request.ip)
+          ss[:status] = :logged_out
+        end
+        redirect to('/')
       end
 
       post '/sqrl.html' do

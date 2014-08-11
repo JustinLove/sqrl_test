@@ -24,6 +24,9 @@ module SQRL
       get '/' do
         nut = SQRL::ReversibleNut.new(ENV['SERVER_KEY'], request.ip).to_s
         auth_url = SQRL::URL.qrl(request.host+':'+request.port.to_s+'/sqrl', nut).to_s
+        if params[:tif_base]
+          auth_url += '&tif_base=' + params[:tif_base]
+        end
         if ss = ServerSession.for_ip(request.ip)
           erb :logged_in, :locals => {
             :props => ss,
@@ -58,9 +61,10 @@ module SQRL
       post '/sqrl' do
         response = Response.new(request.body.read, request.ip, params[:nut])
         response.execute_commands
-        puts response.server_string
-        puts response.response_body
-        return response.response_body
+        res = response.response((params[:tif_base] || 16).to_i)
+        puts res.server_string
+        puts res.response_body
+        return res.response_body
       end
     end
   end

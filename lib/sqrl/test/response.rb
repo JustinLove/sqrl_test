@@ -11,6 +11,7 @@ module SQRL
         @request_ip = request_ip
         @param_nut = param_nut
         @req = SQRL::AuthenticationQueryParser.new(request_body)
+        p @req.client_data
         @command_failed = !valid?
         @sqrl_failure = !valid?
         @commands = Commands.new(@req, login_ip)
@@ -56,14 +57,16 @@ module SQRL
 
       def flags
         @flags ||= {
+          :id_match => !!session,
           :ip_match => @request_ip == login_ip,
+          :login_enabled => true,
+          :logged_in => logged_in?,
           :command_failed => @command_failed,
           :sqrl_failure => @sqrl_failure,
-          :logged_in => logged_in?,
         }
       end
 
-      def response
+      def response(base = 16)
         res_nut = SQRL::OpaqueNut.new
         response = SQRL::AuthenticationResponseGenerator.new(res_nut, flags, {
           :sfn => 'SQRL::Test',
@@ -75,14 +78,8 @@ module SQRL
           :request_ip => @request_ip,
           :login_ip => login_ip
         }.merge(flags))
-      end
-
-      def response_body
-        response.response_body
-      end
-
-      def server_string
-        response.server_string
+        response.tif_base = base
+        response
       end
     end
   end

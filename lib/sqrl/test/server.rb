@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'rqrcode'
 require 'sqrl/test/response'
+require 'sqrl/test/server_key'
 require 'sqrl/reversible_nut'
 require 'sqrl/url'
 
@@ -22,7 +23,7 @@ module SQRL
       end
 
       get '/' do
-        nut = SQRL::ReversibleNut.new(ENV['SERVER_KEY'], request.ip).to_s
+        nut = SQRL::ReversibleNut.new(ServerKey, request.ip).to_s
         auth_url = SQRL::URL.qrl(request.host+':'+request.port.to_s+'/sqrl', nut).to_s
         if params[:tif_base]
           auth_url += '&tif_base=' + params[:tif_base]
@@ -48,7 +49,7 @@ module SQRL
       end
 
       post '/sqrl.html' do
-        nut = SQRL::ReversibleNut.reverse(ENV['SERVER_KEY'], params[:nut])
+        nut = SQRL::ReversibleNut.reverse(ServerKey, params[:nut])
         req = SQRL::AuthenticationQueryParser.new(request.body.read)
         props = Hash[RequestProperties.map {|prop| [prop, req.__send__(prop)]}]
         props['signature valid'] = req.valid?

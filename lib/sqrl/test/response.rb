@@ -1,5 +1,6 @@
 require 'sqrl/test/commands'
 require 'sqrl/test/server_session'
+require 'sqrl/test/server_key'
 require 'sqrl/authentication_query_parser'
 require 'sqrl/authentication_response_generator'
 require 'sqrl/opaque_nut'
@@ -27,7 +28,7 @@ module SQRL
 
       def login_ip
         if @param_nut
-          SQRL::ReversibleNut.reverse(ENV['SERVER_KEY'], @param_nut).ip
+          SQRL::ReversibleNut.reverse(ServerKey, @param_nut).ip
         elsif session
           session[:ip]
         else

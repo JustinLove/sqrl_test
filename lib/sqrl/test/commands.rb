@@ -40,7 +40,10 @@ module SQRL
 
       def login
         ServerSession.login(@login_ip, @req.idk)
-        true
+      end
+
+      def logoff
+        ServerSession.logoff(@login_ip, @req.idk)
       end
 
       COMMANDS = %w[

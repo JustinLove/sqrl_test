@@ -31,9 +31,22 @@ module SQRL
 
       def login(ip, idk)
         session = for_idk(idk)
-        return unless session
+        return false unless session
         session[:ip] = ip
         session[:status] = :logged_in
+        true
+      end
+
+      def logoff(ip, idk)
+        if session = for_idk(idk)
+          session[:status] = :logged_out
+          true
+        elsif session = for_ip(ip)
+          session[:status] = :logged_out
+          true
+        else
+          false
+        end
       end
 
       def create(ip, idk, nut)

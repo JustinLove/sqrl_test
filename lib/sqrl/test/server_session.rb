@@ -27,8 +27,9 @@ module SQRL
       def assert(ip, idk, nut)
         if session = for_idk(idk)
           session[:ip] = ip
+        elsif for_ip(ip)
         else
-          create(ip, idk, nut)
+          create(ip, nut)
         end
       end
 
@@ -68,8 +69,8 @@ module SQRL
         end
       end
 
-      def create(ip, idk, nut)
-        $server_sessions << {:ip => ip, :idk => idk, :nut => nut, :status => :known}
+      def create(ip, nut)
+        $server_sessions << {:ip => ip, :nut => nut, :status => :known}
       end
     end
   end

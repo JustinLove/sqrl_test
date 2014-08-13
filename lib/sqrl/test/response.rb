@@ -40,6 +40,10 @@ module SQRL
         session && session[:status] == :logged_in
       end
 
+      def server_unlock_key
+        session && session[:suk]
+      end
+
       def execute_commands
         return unless valid?
 
@@ -71,6 +75,7 @@ module SQRL
         res_nut = SQRL::OpaqueNut.new
         response = SQRL::AuthenticationResponseGenerator.new(res_nut, flags, {
           :sfn => 'SQRL::Test',
+          :suk => server_unlock_key,
           :signature_valid => valid?,
           :recognized_commands => @commands.recognized.join(','),
           :unrecognized_commands => @commands.unrecognized.join(','),

@@ -1,3 +1,5 @@
+require 'sqrl/base64'
+
 $server_sessions = []
 
 module SQRL
@@ -16,9 +18,9 @@ module SQRL
       def list
         $server_sessions.map{|s|
           x = s.dup
-          x[:idk] = Base64.urlsafe_encode64(s[:idk]).sub(/=*\z/, '')
-          x[:suk] = Base64.urlsafe_encode64(s[:suk]).sub(/=*\z/, '')
-          x[:vuk] = Base64.urlsafe_encode64(s[:vuk]).sub(/=*\z/, '')
+          x[:idk] = Base64.encode(s[:idk])
+          x[:suk] = Base64.encode(s[:suk])
+          x[:vuk] = Base64.encode(s[:vuk])
           x.map {|k,v| [k,v].join(':')}.join(', ')
         }.join(',')
       end

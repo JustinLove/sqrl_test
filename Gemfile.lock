@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/JustinLove/sqrl_auth.git
-  revision: 439bc4708381f5d5f27f0e88696b036792f9a722
+  revision: fd76b2c5dd540f15df784d6d6b8c08f290704d2c
   branch: master
   specs:
     sqrl_auth (0.0.1)

@@ -17,12 +17,11 @@ module SQRL
 
       def list
         $server_sessions.map{|s|
-          x = s.dup
-          x[:idk] = Base64.encode(s[:idk])
-          x[:suk] = Base64.encode(s[:suk])
-          x[:vuk] = Base64.encode(s[:vuk])
-          x.map {|k,v| [k,v].join(':')}.join(', ')
-        }.join(',')
+          s.map {|k,v|
+            v = Base64.encode(v) if v.kind_of?(String) && v.match(/[^:print:]|=/)
+            [k,v].join(':')
+          }.join(', ')
+        }.join(';')
       end
 
       def assert(ip, idk, nut)

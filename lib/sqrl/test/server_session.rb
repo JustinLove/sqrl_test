@@ -32,11 +32,20 @@ module SQRL
         end
       end
 
+      def setkey(ip, idk)
+        if session = for_ip(ip) || for_idk(idk)
+          session[:idk] = idk
+          !!idk
+        else
+          false
+        end
+      end
+
       def setlock(ip, idk, suk, vuk)
         if session = for_idk(idk) || for_ip(ip)
           session[:suk] = suk
           session[:vuk] = vuk
-          suk && vuk
+          !!(suk && vuk)
         else
           false
         end

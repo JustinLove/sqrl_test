@@ -46,9 +46,10 @@ module SQRL
         ServerSession.login(@login_ip, @req.idk)
       end
 
-      def logoff
-        ServerSession.logoff(@login_ip, @req.idk)
+      def logout
+        ServerSession.logout(@login_ip, @req.idk)
       end
+      alias_method :logoff, :logout
 
       COMMANDS = %w[
         setkey
@@ -59,6 +60,7 @@ module SQRL
         create
         login
         logme
+        logout
         logoff
       ]
     end

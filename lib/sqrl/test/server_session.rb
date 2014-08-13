@@ -50,7 +50,7 @@ module SQRL
         true
       end
 
-      def logoff(ip, idk)
+      def logout(ip, idk)
         if session = for_idk(idk) || for_ip(ip)
           session[:status] = :logged_out
           true

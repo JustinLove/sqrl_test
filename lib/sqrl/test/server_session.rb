@@ -24,15 +24,6 @@ module SQRL
         }.join(';')
       end
 
-      def assert(ip, idk, nut)
-        if session = for_idk(idk)
-          session[:ip] = ip
-        elsif for_ip(ip)
-        else
-          create(ip, nut)
-        end
-      end
-
       def setkey(ip, idk)
         if session = for_ip(ip) || for_idk(idk)
           session[:idk] = idk
@@ -42,14 +33,20 @@ module SQRL
         end
       end
 
-      def setlock(ip, idk, suk, vuk)
-        if session = for_idk(idk) || for_ip(ip)
+      def setlock(idk, suk, vuk)
+        if session = for_idk(idk)
           session[:suk] = suk
           session[:vuk] = vuk
           !!(suk && vuk)
         else
           false
         end
+      end
+
+      def create(ip)
+        session = for_ip(ip)
+        return false if session
+        $server_sessions << {:ip => ip, :status => :known}
       end
 
       def login(ip, idk)
@@ -60,17 +57,13 @@ module SQRL
         true
       end
 
-      def logout(ip, idk)
-        if session = for_idk(idk) || for_ip(ip)
+      def logout(idk)
+        if session = for_idk(idk)
           session[:status] = :logged_out
           true
         else
           false
         end
-      end
-
-      def create(ip, nut)
-        $server_sessions << {:ip => ip, :nut => nut, :status => :known}
       end
     end
   end

@@ -47,8 +47,6 @@ module SQRL
       def execute_commands
         return unless valid?
 
-        ServerSession.assert(login_ip, @req.idk, @param_nut)
-
         @req.commands.each do |command|
           @commands.receive(command)
         end

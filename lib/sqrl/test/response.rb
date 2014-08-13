@@ -64,6 +64,7 @@ module SQRL
           :ip_match => @request_ip == login_ip,
           :login_enabled => !!session,
           :logged_in => logged_in?,
+          :creation_allowed => !ServerSession.for_ip(login_ip),
           :command_failed => @command_failed,
           :sqrl_failure => @sqrl_failure,
         }

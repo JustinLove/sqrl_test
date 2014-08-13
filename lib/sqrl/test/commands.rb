@@ -38,6 +38,10 @@ module SQRL
         end
       end
 
+      def setlock
+        ServerSession.setlock(@login_ip, @req.idk, @req.suk, @req.vuk)
+      end
+
       def login
         ServerSession.login(@login_ip, @req.idk)
       end

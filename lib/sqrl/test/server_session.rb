@@ -17,6 +17,8 @@ module SQRL
         $server_sessions.map{|s|
           x = s.dup
           x[:idk] = Base64.urlsafe_encode64(s[:idk]).sub(/=*\z/, '')
+          x[:suk] = Base64.urlsafe_encode64(s[:suk]).sub(/=*\z/, '')
+          x[:vuk] = Base64.urlsafe_encode64(s[:vuk]).sub(/=*\z/, '')
           x.map {|k,v| [k,v].join(':')}.join(', ')
         }.join(',')
       end
@@ -29,6 +31,16 @@ module SQRL
         end
       end
 
+      def setlock(ip, idk, suk, vuk)
+        if session = for_idk(idk) || for_ip(ip)
+          session[:suk] = suk
+          session[:vuk] = vuk
+          suk && vuk
+        else
+          false
+        end
+      end
+
       def login(ip, idk)
         session = for_idk(idk)
         return false unless session
@@ -38,10 +50,7 @@ module SQRL
       end
 
       def logoff(ip, idk)
-        if session = for_idk(idk)
-          session[:status] = :logged_out
-          true
-        elsif session = for_ip(ip)
+        if session = for_idk(idk) || for_ip(ip)
           session[:status] = :logged_out
           true
         else

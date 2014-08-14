@@ -12,10 +12,11 @@ module SQRL
         @request_ip = request_ip
         @param_nut = param_nut
         @req = SQRL::AuthenticationQueryParser.new(request_body)
+        @req.login_ip = login_ip
         p @req.client_data
         @command_failed = !valid?
         @sqrl_failure = !valid?
-        @commands = Commands.new(@req, login_ip)
+        @commands = Commands.new(@req)
       end
 
       def valid?

@@ -4,9 +4,8 @@ require 'sqrl/test/server_sessions'
 module SQRL
   module Test
     class Commands
-      def initialize(req, login_ip)
+      def initialize(req)
         @req = req
-        @login_ip = login_ip
         @executed = []
         @recognized = []
         @unrecognized = []
@@ -51,12 +50,12 @@ module SQRL
 
       def create
         return false if session.found?
-        @session = ServerSessions.create(@login_ip)
+        @session = ServerSessions.create(@req.login_ip)
         true
       end
 
       def login
-        session.login(@login_ip)
+        session.login(@req.login_ip)
       end
 
       def logout
@@ -78,7 +77,7 @@ module SQRL
       ]
 
       def session
-        @session = ServerSessions.lookup(@req.idk, @login_ip)
+        @session = ServerSessions.lookup(@req)
       end
     end
   end

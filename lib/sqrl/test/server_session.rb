@@ -1,69 +1,38 @@
+require 'ostruct'
 require 'sqrl/base64'
-
-$server_sessions = []
 
 module SQRL
   module Test
-    module ServerSession
-      extend self
+    class ServerSession < OpenStruct
+      def found?; true; end
 
-      def for_ip(ip)
-        $server_sessions.find {|s| s[:ip] == ip}
+      def setkey(idk)
+        self[:idk] = idk
+        !!idk
       end
 
-      def for_idk(idk)
-        $server_sessions.find {|s| s[:idk] == idk}
+      def setlock(suk, vuk)
+        self[:suk] = suk
+        self[:vuk] = vuk
+        !!(suk && vuk)
       end
 
-      def list
-        $server_sessions.map{|s|
-          s.map {|k,v|
-            v = Base64.encode(v) if v.kind_of?(String) && v.match(/[^:print:]|=/)
-            [k,v].join(':')
-          }.join(', ')
-        }.join(';')
-      end
-
-      def setkey(ip, idk)
-        if session = for_ip(ip) || for_idk(idk)
-          session[:idk] = idk
-          !!idk
-        else
-          false
-        end
-      end
-
-      def setlock(idk, suk, vuk)
-        if session = for_idk(idk)
-          session[:suk] = suk
-          session[:vuk] = vuk
-          !!(suk && vuk)
-        else
-          false
-        end
-      end
-
-      def create(ip)
-        session = for_ip(ip)
-        return false if session
-        $server_sessions << {:ip => ip, :status => :known}
-      end
-
-      def login(ip, idk)
-        session = for_idk(idk)
-        return false unless session
-        session[:ip] = ip
-        session[:status] = :logged_in
+      def login(ip)
+        self[:ip] = ip
+        self[:status] = :logged_in
         true
       end
 
-      def logout(idk)
-        if session = for_idk(idk)
-          session[:status] = :logged_out
-          true
-        else
-          false
-        end
+      def logout
+        self[:status] = :logged_out
+        true
+      end
+
+      def to_s
+        to_h.map {|k,v|
+          v = Base64.encode(v) if v.kind_of?(String) && v.match(/[^:print:]|=/)
+          [k,v].join(':')
+        }.join(', ')
       end
     end
   end

@@ -1,5 +1,5 @@
 require 'sqrl/test/commands'
-require 'sqrl/test/server_session'
+require 'sqrl/test/server_sessions'
 require 'sqrl/test/server_key'
 require 'sqrl/authentication_query_parser'
 require 'sqrl/authentication_response_generator'
@@ -23,7 +23,7 @@ module SQRL
       end
 
       def session
-        @session ||= ServerSession.for_idk(@req.idk)
+        @session ||= ServerSessions.for_idk(@req.idk)
       end
 
       def login_ip
@@ -60,11 +60,11 @@ module SQRL
 
       def flags
         @flags ||= {
-          :id_match => !!session,
+          :id_match => !!session.found?,
           :ip_match => @request_ip == login_ip,
-          :login_enabled => !!session,
+          :login_enabled => !!session.found?,
           :logged_in => logged_in?,
-          :creation_allowed => !ServerSession.for_ip(login_ip),
+          :creation_allowed => !ServerSessions.for_ip(login_ip).found?,
           :command_failed => @command_failed,
           :sqrl_failure => @sqrl_failure,
         }
@@ -79,7 +79,7 @@ module SQRL
           :recognized_commands => @commands.recognized.join(','),
           :unrecognized_commands => @commands.unrecognized.join(','),
           :executed_commands => @commands.executed.join(','),
-          :sessions => ServerSession.list,
+          :sessions => ServerSessions.list,
           :request_ip => @request_ip,
           :login_ip => login_ip
         }.merge(flags))

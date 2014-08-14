@@ -39,23 +39,25 @@ module SQRL
       end
 
       def setkey
-        ServerSession.setkey(@login_ip, @req.idk)
+        ServerSessions.for_ip(@login_ip).setkey(@req.idk)
       end
 
       def setlock
-        ServerSession.setlock(@req.idk, @req.suk, @req.vuk)
+        ServerSessions.for_idk(@req.idk).setlock(@req.suk, @req.vuk)
       end
 
       def create
-        ServerSession.create(@login_ip)
+        ServerSessions.create(@login_ip)
       end
 
       def login
-        ServerSession.login(@login_ip, @req.idk)
+        session = ServerSessions.for_idk(@req.idk)
+        return false unless session.found?
+        session.login(@login_ip)
       end
 
       def logout
-        ServerSession.logout(@req.idk)
+        ServerSessions.for_idk(@req.idk).logout
       end
       alias_method :logoff, :logout
 

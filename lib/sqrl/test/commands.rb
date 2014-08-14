@@ -1,3 +1,6 @@
+require 'sqrl/test/null_session'
+require 'sqrl/test/server_sessions'
+
 module SQRL
   module Test
     class Commands
@@ -39,25 +42,25 @@ module SQRL
       end
 
       def setkey
-        ServerSessions.for_ip(@login_ip).setkey(@req.idk)
+        session.setkey(@req.idk)
       end
 
       def setlock
-        ServerSessions.for_idk(@req.idk).setlock(@req.suk, @req.vuk)
+        session.setlock(@req.suk, @req.vuk)
       end
 
       def create
-        ServerSessions.create(@login_ip)
+        return false if session.found?
+        @session = ServerSessions.create(@login_ip)
+        true
       end
 
       def login
-        session = ServerSessions.for_idk(@req.idk)
-        return false unless session.found?
         session.login(@login_ip)
       end
 
       def logout
-        ServerSessions.for_idk(@req.idk).logout
+        session.logout
       end
       alias_method :logoff, :logout
 
@@ -73,6 +76,10 @@ module SQRL
         logout
         logoff
       ]
+
+      def session
+        @session = ServerSessions.lookup(@req.idk, @login_ip)
+      end
     end
   end
 end

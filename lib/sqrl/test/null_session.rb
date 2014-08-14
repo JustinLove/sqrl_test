@@ -7,9 +7,9 @@ module SQRL
       def []=(key, value); value; end
 
       def found?; false; end
-      def setkey(idk); false; end
-      def setlock(uk, vuk); false; end
-      def login(ip); false; end
+      def setkey(req); false; end
+      def setlock(req); false; end
+      def login(req); false; end
       def logout; false; end
 
       def to_s; 'NullSession'; end

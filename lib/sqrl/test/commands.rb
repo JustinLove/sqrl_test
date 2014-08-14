@@ -41,21 +41,21 @@ module SQRL
       end
 
       def setkey
-        session.setkey(@req.idk)
+        session.setkey(@req)
       end
 
       def setlock
-        session.setlock(@req.suk, @req.vuk)
+        session.setlock(@req)
       end
 
       def create
         return false if session.found?
-        @session = ServerSessions.create(@req.login_ip)
+        @session = ServerSessions.create(@req)
         true
       end
 
       def login
-        session.login(@req.login_ip)
+        session.login(@req)
       end
 
       def logout

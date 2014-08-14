@@ -24,8 +24,8 @@ module SQRL
         $server_sessions.join(';')
       end
 
-      def create(ip)
-        session = ServerSession.new(:ip => ip, :status => :known)
+      def create(req)
+        session = ServerSession.new(:ip => req.login_ip, :status => :known)
         $server_sessions << session
         session
       end

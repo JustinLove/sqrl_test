@@ -6,19 +6,19 @@ module SQRL
     class ServerSession < OpenStruct
       def found?; true; end
 
-      def setkey(req)
-        self[:idk] = req.idk
+      def setkey(idk)
+        self[:idk] = idk
         !!idk
       end
 
-      def setlock(req)
-        self[:suk] = req.suk
-        self[:vuk] = req.vuk
+      def setlock(suk, vuk)
+        self[:suk] = suk
+        self[:vuk] = vuk
         !!(suk && vuk)
       end
 
-      def login(req)
-        self[:ip] = req.login_ip
+      def login(ip)
+        self[:ip] = ip
         self[:status] = :logged_in
         true
       end

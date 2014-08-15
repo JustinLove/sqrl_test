@@ -41,11 +41,11 @@ module SQRL
       end
 
       def setkey
-        session.setkey(@req)
+        session.setkey(@req.idk)
       end
 
       def setlock
-        session.setlock(@req)
+        session.setlock(@req.suk, @req.vuk)
       end
 
       def create
@@ -55,7 +55,7 @@ module SQRL
       end
 
       def login
-        session.login(@req)
+        session.login(@req.login_ip)
       end
 
       def logout

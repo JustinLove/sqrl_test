@@ -41,5 +41,11 @@
       <p>Login with SQRL</p>
       </a>
     </div>
+    <% if tif_base == '10' %>
+      <p>TIF base = 10 for the <a href="https://play.google.com/store/apps/details?id=net.vrallev.android.sqrl">android client</a>.</p>
+      <p>Use <a href="/">TIF base 16</a></p>
+    <% else %>
+      <p>For the <a href="https://play.google.com/store/apps/details?id=net.vrallev.android.sqrl">android client</a>, you may need to use <a href="/?tif_base=10">TIF base 10</a></p>
+    <% end %>
   </body>
 </html>

@@ -36,6 +36,7 @@ module SQRL
         else
           erb :index, :locals => {
             :auth_url => auth_url,
+            :tif_base => params[:tif_base],
             :qr => RQRCode::QRCode.new(auth_url, :size => 10),
           }
         end

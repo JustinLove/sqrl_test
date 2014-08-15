@@ -1,5 +1,6 @@
 require 'sqrl/test/null_session'
 require 'sqrl/test/server_sessions'
+require 'set'
 
 module SQRL
   module Test
@@ -10,6 +11,7 @@ module SQRL
         @recognized = []
         @unrecognized = []
         @executed = []
+        @errors = Set.new
       end
 
       attr_reader :req
@@ -17,6 +19,7 @@ module SQRL
       attr_reader :recognized
       attr_reader :unrecognized
       attr_reader :executed
+      attr_reader :errors
 
       def unexecuted
         recognized - executed
@@ -100,29 +103,38 @@ module SQRL
 
       def ids?
         @ids_valid ||= req.valid?
+        errors << "Identity signature not valid" unless @ids_valid
+        @ids_valid
       end
 
       def urs?
         @urs_valid ||= true
+        errors << "Unlock signature not valid" unless @urs_valid
+        @urs_valid
       end
 
       def session?
+        errors << "Session required" unless session.found?
         session.found?
       end
 
       def no_session?
+        errors << "Session already exists" if session.found?
         !session.found?
       end
 
       def idk?
+        errors << "IDK required" unless @req.idk
         !!@req.idk
       end
 
       def suk?
+        errors << "SUK required" unless @req.suk
         !!@req.suk
       end
 
       def vuk?
+        errors << "VUK required" unless @req.vuk
         !!@req.vuk
       end
     end

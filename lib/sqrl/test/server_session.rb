@@ -30,7 +30,7 @@ module SQRL
 
       def to_s
         to_h.map {|k,v|
-          v = Base64.encode(v) if v.kind_of?(String) && v.match(/[^:print:]|=/)
+          v = Base64.encode(v) if v.kind_of?(String) && v.match(/[^[:print:]]|=/)
           [k,v].join(':')
         }.join(', ')
       end

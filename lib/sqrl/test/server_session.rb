@@ -30,10 +30,15 @@ module SQRL
       end
 
       def to_s
-        to_h.map {|k,v|
-          v = Base64.encode(v) if v.kind_of?(String) && v.match(/[^[:print:]]|=/)
-          [k,v].join(':')
-        }.join(', ')
+        to_h_printable.map {|pair| pair.join(':')}.join(', ')
+      end
+
+      def to_h_printable
+        h = to_h
+        h.each_pair {|k,v|
+          h[k] = Base64.encode(v) if v.kind_of?(String) && v.match(/[^[:print:]]|=/)
+        }
+        h
       end
     end
   end

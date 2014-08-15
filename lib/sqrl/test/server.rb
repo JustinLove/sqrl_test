@@ -31,7 +31,7 @@ module SQRL
         ss = ServerSessions.for_ip(request.ip)
         if ss[:status] == :logged_in
           erb :logged_in, :locals => {
-            :props => ss,
+            :props => ss.to_h_printable,
           }
         else
           erb :index, :locals => {

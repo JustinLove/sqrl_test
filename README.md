@@ -18,7 +18,21 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Demo server: http://sqrl-test.herokuapp.com
+
+Visit `/` for the qr-code.
+
+For certain clients, you may need to append `?tif_base=10`
+
+Session state (including "user accounts") is stored in memory and will frequently reset.
+
+### Supported Commands:
+
+- setkey (signatures not checked)
+- setlock (signatures not checked)
+- create
+- login
+- logout (alias: logoff)
 
 ## Contributing
 

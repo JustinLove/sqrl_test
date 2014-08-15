@@ -16,21 +16,20 @@ module SQRL
         p @req.client_data
         @command_failed = !valid?
         @sqrl_failure = !valid?
-        @commands = Commands.new(@req)
+        @session = ServerSessions.for_idk(@req.idk)
+        @commands = Commands.new(@req, @session)
       end
+
+      attr_reader :session
 
       def valid?
         @req.valid?
       end
 
-      def session
-        @session ||= ServerSessions.for_idk(@req.idk)
-      end
-
       def login_ip
         if @param_nut
           SQRL::ReversibleNut.reverse(ServerKey, @param_nut).ip
-        elsif session
+        elsif session.found?
           session[:ip]
         else
           @request_ip
@@ -38,11 +37,11 @@ module SQRL
       end
 
       def logged_in?
-        session && session[:status] == :logged_in
+        session[:status] == :logged_in
       end
 
       def server_unlock_key
-        session && session[:suk]
+        session[:suk]
       end
 
       def execute_commands
@@ -51,6 +50,8 @@ module SQRL
         @req.commands.each do |command|
           @commands.receive(command)
         end
+
+        @session = @commands.session
 
         if @commands.unrecognized?
           @sqrl_failure = @command_failed = true
@@ -61,11 +62,11 @@ module SQRL
 
       def flags
         @flags ||= {
-          :id_match => !!session.found?,
+          :id_match => session.found?,
           :ip_match => @request_ip == login_ip,
-          :login_enabled => !!session.found?,
+          :login_enabled => session.found?,
           :logged_in => logged_in?,
-          :creation_allowed => !ServerSessions.for_idk(@req.idk).found?,
+          :creation_allowed => !session.found?,
           :command_failed => @command_failed,
           :sqrl_failure => @sqrl_failure,
         }

@@ -16,10 +16,6 @@ module SQRL
         find_idk(idk) || NullSession
       end
 
-      def lookup(req)
-        find_idk(req.idk) || find_ip(req.login_ip) || NullSession
-      end
-
       def list
         $server_sessions.join(';')
       end

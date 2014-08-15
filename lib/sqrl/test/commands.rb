@@ -4,13 +4,15 @@ require 'sqrl/test/server_sessions'
 module SQRL
   module Test
     class Commands
-      def initialize(req)
+      def initialize(req, session)
         @req = req
+        @session = session
         @executed = []
         @recognized = []
         @unrecognized = []
       end
 
+      attr_reader :session
       attr_reader :executed
       attr_reader :recognized
       attr_reader :unrecognized
@@ -75,10 +77,6 @@ module SQRL
         logout
         logoff
       ]
-
-      def session
-        @session = ServerSessions.lookup(@req)
-      end
     end
   end
 end

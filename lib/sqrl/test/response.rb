@@ -81,6 +81,7 @@ module SQRL
           :recognized_commands => @commands.recognized.join(','),
           :unrecognized_commands => @commands.unrecognized.join(','),
           :executed_commands => @commands.executed.join(','),
+          :unexecuted_commands => @commands.unexecuted.join(','),
           :sessions => ServerSessions.list,
           :request_ip => @request_ip,
           :login_ip => login_ip

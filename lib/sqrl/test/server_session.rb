@@ -8,25 +8,21 @@ module SQRL
 
       def setkey(idk)
         self[:idk] = idk
-        !!idk
       end
 
       def setlock(suk, vuk)
         self[:suk] = suk
         self[:vuk] = vuk
-        !!(suk && vuk)
       end
 
       def login(ip)
         self[:ip] = ip
         self[:status] = :logged_in
-        true
       end
 
       def logout
         self[:ip] = nil
         self[:status] = :logged_out
-        true
       end
 
       def to_s

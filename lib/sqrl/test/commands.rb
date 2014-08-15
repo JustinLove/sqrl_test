@@ -7,8 +7,6 @@ module SQRL
       def initialize(req, session)
         @req = req
         @session = session
-        @ids_valid = req.valid?
-        @urs_valid = true
         @recognized = []
         @unrecognized = []
         @executed = []
@@ -51,35 +49,35 @@ module SQRL
       end
 
       def allow_setkey?
-        @ids_valid && @urs_valid && session.found? && req.idk
+        ids? && urs? && session? && idk?
       end
       def setkey
         session.setkey(req.idk)
       end
 
       def allow_setlock?
-        @ids_valid && @urs_valid && session.found? && req.suk && req.vuk
+        ids? && urs? && session? && suk? && vuk?
       end
       def setlock
         session.setlock(req.suk, req.vuk)
       end
 
       def allow_create?
-        @ids_valid && !session.found?
+        ids? && no_session?
       end
       def create
         @session = ServerSessions.create(req)
       end
 
       def allow_login?
-        @ids_valid && session.found?
+        ids? && session?
       end
       def login
         session.login(req.login_ip)
       end
 
       def allow_logout?
-        @ids_valid && session.found?
+        ids? && session?
       end
       alias_method :allow_logoff?, :allow_logout?
       def logout
@@ -99,6 +97,34 @@ module SQRL
         logout
         logoff
       ]
+
+      def ids?
+        @ids_valid ||= req.valid?
+      end
+
+      def urs?
+        @urs_valid ||= true
+      end
+
+      def session?
+        session.found?
+      end
+
+      def no_session?
+        !session.found?
+      end
+
+      def idk?
+        !!@req.idk
+      end
+
+      def suk?
+        !!@req.suk
+      end
+
+      def vuk?
+        !!@req.vuk
+      end
     end
   end
 end

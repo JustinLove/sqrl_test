@@ -43,6 +43,7 @@ module SQRL
 
       get '/logout' do
         ss = ServerSessions.for_ip(request.ip)
+        ss[:ip] = nil
         ss[:status] = :logged_out
         redirect to('/')
       end

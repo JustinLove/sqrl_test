@@ -24,6 +24,7 @@ module SQRL
       end
 
       def logout
+        self[:ip] = nil
         self[:status] = :logged_out
         true
       end

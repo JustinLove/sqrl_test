@@ -1,8 +1,8 @@
 require 'sqrl/test/commands'
 require 'sqrl/test/server_sessions'
 require 'sqrl/test/server_key'
-require 'sqrl/authentication_query_parser'
-require 'sqrl/authentication_response_generator'
+require 'sqrl/query_parser'
+require 'sqrl/response_generator'
 require 'sqrl/opaque_nut'
 
 module SQRL
@@ -11,7 +11,7 @@ module SQRL
       def initialize(request_body, request_ip, param_nut)
         @request_ip = request_ip
         @param_nut = param_nut
-        @req = SQRL::AuthenticationQueryParser.new(request_body)
+        @req = SQRL::QueryParser.new(request_body)
         @req.login_ip = login_ip
         p @req.client_data
         @command_failed = !valid?
@@ -74,7 +74,7 @@ module SQRL
 
       def response(base = 16)
         res_nut = SQRL::OpaqueNut.new
-        response = SQRL::AuthenticationResponseGenerator.new(res_nut, flags, {
+        response = SQRL::ResponseGenerator.new(res_nut, flags, {
           :sfn => 'SQRL::Test',
           :suk => server_unlock_key,
           :signature_valid => valid?,

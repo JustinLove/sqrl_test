@@ -49,7 +49,7 @@ module SQRL
 
       post '/sqrl.html' do
         nut = SQRL::ReversibleNut.reverse(ServerKey, params[:nut])
-        req = SQRL::AuthenticationQueryParser.new(request.body.read)
+        req = SQRL::QueryParser.new(request.body.read)
         props = Hash[RequestProperties.map {|prop| [prop, req.__send__(prop)]}]
         props['signature valid'] = req.valid?
         props['secure?'] = request.secure?

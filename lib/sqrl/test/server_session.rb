@@ -1,10 +1,19 @@
 require 'ostruct'
 require 'sqrl/base64'
+require 'sqrl/key/verify_unlock'
 
 module SQRL
   module Test
     class ServerSession < OpenStruct
       def found?; true; end
+
+      def locked?
+        self[:suk] && self[:vuk]
+      end
+
+      def vuk
+        self[:vuk] && Key::VerifyUnlock.new(self[:vuk])
+      end
 
       def setkey(idk)
         self[:idk] = idk

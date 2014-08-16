@@ -26,6 +26,10 @@ module SQRL
         @req.valid?
       end
 
+      def locked?
+        session.locked? && !@req.unlocked?(session.vuk)
+      end
+
       def login_ip
         if @param_nut
           SQRL::ReversibleNut.reverse(ServerKey, @param_nut).ip
@@ -78,6 +82,7 @@ module SQRL
           :sfn => 'SQRL::Test',
           :suk => server_unlock_key,
           :signature_valid => valid?,
+          :locked => locked?,
           :recognized_commands => @commands.recognized.join(','),
           :unrecognized_commands => @commands.unrecognized.join(','),
           :executed_commands => @commands.executed.join(','),

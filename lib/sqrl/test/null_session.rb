@@ -7,6 +7,7 @@ module SQRL
       def []=(key, value); value; end
 
       def found?; false; end
+      def locked?; false; end
       def setkey(idk); end
       def setlock(suk, vuk); end
       def login(ip); end

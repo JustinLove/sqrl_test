@@ -52,14 +52,14 @@ module SQRL
       end
 
       def allow_setkey?
-        ids? && urs? && session? && idk?
+        ids? && unlocked? && session? && idk?
       end
       def setkey
         session.setkey(req.idk)
       end
 
       def allow_setlock?
-        ids? && urs? && session? && suk? && vuk?
+        ids? && unlocked? && session? && suk? && vuk?
       end
       def setlock
         session.setlock(req.suk, req.vuk)
@@ -107,10 +107,10 @@ module SQRL
         @ids_valid
       end
 
-      def urs?
-        @urs_valid ||= true
-        errors << "Unlock signature not valid" unless @urs_valid
-        @urs_valid
+      def unlocked?
+        @unlocked ||= !session.locked? || req.unlocked?(session.vuk)
+        errors << "Session is locked and unlock signature not valid" unless @unlocked
+        @unlocked
       end
 
       def session?

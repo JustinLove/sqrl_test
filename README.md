@@ -28,8 +28,8 @@ Session state (including "user accounts") is stored in memory and will frequentl
 
 ### Supported Commands:
 
-- setkey (signatures not checked)
-- setlock (signatures not checked)
+- setkey
+- setlock
 - create
 - login
 - logout (alias: logoff)

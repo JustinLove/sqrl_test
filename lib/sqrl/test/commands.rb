@@ -56,6 +56,7 @@ module SQRL
       def setkey
         session.setkey(req.idk)
       end
+
       def setlock
         session.setlock(req.suk, req.vuk)
       end

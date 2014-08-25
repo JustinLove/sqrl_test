@@ -34,6 +34,10 @@ module SQRL
         self[:status] = :logged_out
       end
 
+      def create(req)
+        raise "Cannot create session from an existing session"
+      end
+
       def to_s
         to_h_printable.map {|pair| pair.join(':')}.join(', ')
       end

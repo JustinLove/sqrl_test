@@ -1,4 +1,3 @@
-require 'sqrl/test/server_sessions'
 require 'sqrl/test/permissions'
 
 module SQRL
@@ -62,7 +61,7 @@ module SQRL
       end
 
       def create
-        permissions.session = @session = ServerSessions.create(req)
+        permissions.session = @session = @session.create(req)
       end
 
       def login

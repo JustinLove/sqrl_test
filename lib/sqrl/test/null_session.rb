@@ -1,3 +1,5 @@
+require 'sqrl/test/server_sessions'
+
 module SQRL
   module Test
     module NullSession
@@ -12,6 +14,10 @@ module SQRL
       def setlock(suk, vuk); end
       def login(ip); end
       def logout; end
+
+      def create(req)
+        ServerSessions.create(req)
+      end
 
       def to_s; 'NullSession'; end
     end

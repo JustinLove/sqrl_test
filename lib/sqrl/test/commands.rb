@@ -5,22 +5,16 @@ module SQRL
         @req = req
         @session = session
         @recognized = []
-        @unrecognized = []
         @executed = []
       end
 
       attr_reader :req
       attr_reader :session
       attr_reader :recognized
-      attr_reader :unrecognized
       attr_reader :executed
 
       def unexecuted
         recognized - executed
-      end
-
-      def unrecognized?
-        unrecognized.length > 0
       end
 
       def unexecuted?
@@ -37,8 +31,6 @@ module SQRL
         if COMMANDS.include?(command)
           recognized << command
           execute(command)
-        else
-          unrecognized << command
         end
       end
 

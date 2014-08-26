@@ -51,19 +51,12 @@ module SQRL
       end
 
       def execute_commands
-        unless @permissions.allow_transaction?
-          @command_failed = true
-          return
-        end
-
-        @commands.execute_transaction
-
-        @session = @commands.session
-
-        if @commands.unrecognized?
+        if @permissions.allow_transaction?
+          @commands.execute_transaction
+          @session = @commands.session
+          @command_failed = true if @commands.unexecuted?
+        else
           @sqrl_failure = @command_failed = true
-        elsif @commands.unexecuted?
-          @command_failed = true
         end
       end
 
@@ -86,8 +79,8 @@ module SQRL
           :suk => server_unlock_key,
           :signature_valid => valid?,
           :locked => locked?,
-          :recognized_commands => @commands.recognized.join(','),
-          :unrecognized_commands => @commands.unrecognized.join(','),
+          :recognized_commands => (@req.commands & Commands::COMMANDS).join(','),
+          :unrecognized_commands => (@req.commands - Commands::COMMANDS).join(','),
           :executed_commands => @commands.executed.join(','),
           :unexecuted_commands => @commands.unexecuted.join(','),
           :ask => @permissions.errors.to_a.join(','),

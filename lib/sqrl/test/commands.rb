@@ -4,22 +4,12 @@ module SQRL
       def initialize(req, session)
         @req = req
         @session = session
-        @recognized = []
         @executed = []
       end
 
       attr_reader :req
       attr_reader :session
-      attr_reader :recognized
       attr_reader :executed
-
-      def unexecuted
-        recognized - executed
-      end
-
-      def unexecuted?
-        executed != recognized
-      end
 
       def execute_transaction(commands = req.commands)
         commands.each do |command|
@@ -29,7 +19,6 @@ module SQRL
 
       def receive(command)
         if COMMANDS.include?(command)
-          recognized << command
           execute(command)
         end
       end

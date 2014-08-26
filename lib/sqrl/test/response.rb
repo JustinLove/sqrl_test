@@ -18,8 +18,12 @@ module SQRL
         @command_failed = !valid?
         @sqrl_failure = !valid?
         @session = ServerSessions.for_idk(@req.idk)
-        @commands = Commands.new(@req, @session)
-        @permissions = Permissions.new(@req, @session)
+
+        @allowed_commands = []
+        @disallowed_commands = []
+        @executed_commands = []
+        @unexecuted_commands = []
+        @errors = []
       end
 
       attr_reader :session
@@ -51,10 +55,17 @@ module SQRL
       end
 
       def execute_commands
-        if @permissions.allow_transaction?
-          @commands.execute_transaction
-          @session = @commands.session
-          @command_failed = true if @commands.unexecuted?
+        permissions = Permissions.new(@req, @session)
+        @errors = permissions.errors.to_a
+        @allowed_commands = permissions.allowed_commands
+        @disallowed_commands = @req.commands - @allowed_commands
+        if @allowed_commands == @req.commands
+          commands = Commands.new(@req, @session)
+          commands.execute_transaction
+          @session = commands.session
+          @executed_commands = commands.executed
+          @unexecuted_commands = @req.commands - @executed_commands
+          @command_failed = true if @executed_commands != @req.commands
         else
           @sqrl_failure = @command_failed = true
         end
@@ -81,9 +92,11 @@ module SQRL
           :locked => locked?,
           :recognized_commands => (@req.commands & Commands::COMMANDS).join(','),
           :unrecognized_commands => (@req.commands - Commands::COMMANDS).join(','),
-          :executed_commands => @commands.executed.join(','),
-          :unexecuted_commands => @commands.unexecuted.join(','),
-          :ask => @permissions.errors.to_a.join(','),
+          :allowed_commands => @allowed_commands.join(','),
+          :disallowed_commands => @disallowed_commands.join(','),
+          :executed_commands => @executed_commands.join(','),
+          :unexecuted_commands => @unexecuted_commands.join(','),
+          :ask => @errors.join(','),
           :sessions => ServerSessions.list,
           :request_ip => @request_ip,
           :login_ip => login_ip

@@ -25,13 +25,17 @@ module SQRL
         __send__(query) if respond_to?(query)
       end
 
-      def allow_transaction?(commands = req.commands)
-        commands.all? { |command|
+      def allowed_commands(commands = req.commands)
+        commands.select { |command|
           if allow?(command)
             pusedo_execute(command)
             true
           end
         }
+      end
+
+      def allow_transaction?(commands = req.commands)
+        commands == allowed_commands(commands)
       end
 
       def setkey?

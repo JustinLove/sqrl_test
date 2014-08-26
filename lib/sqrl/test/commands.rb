@@ -1,12 +1,9 @@
-require 'sqrl/test/permissions'
-
 module SQRL
   module Test
     class Commands
       def initialize(req, session)
         @req = req
         @session = session
-        @permissions = Permissions.new(req, session)
         @recognized = []
         @unrecognized = []
         @executed = []
@@ -14,14 +11,9 @@ module SQRL
 
       attr_reader :req
       attr_reader :session
-      attr_reader :permissions
       attr_reader :recognized
       attr_reader :unrecognized
       attr_reader :executed
-
-      def errors
-        permissions.errors
-      end
 
       def unexecuted
         recognized - executed
@@ -46,10 +38,8 @@ module SQRL
 
       def execute(command)
         if respond_to?(command)
-          if permissions.allow?(command)
-            __send__(command)
-            executed << command
-          end
+          __send__(command)
+          executed << command
         end
       end
 
@@ -62,7 +52,7 @@ module SQRL
       end
 
       def create
-        permissions.session = @session = @session.create(req)
+        @session = @session.create(req)
       end
 
       def login

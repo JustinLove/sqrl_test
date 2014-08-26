@@ -5,18 +5,34 @@ module SQRL
     class Permissions
       def initialize(req, session)
         @req = req
-        @session = session
+        self.session = session
         @errors = Set.new
       end
 
       attr_reader :req
-      attr_accessor :session
+      attr_reader :session
 
       attr_reader :errors
+
+      def session=(session)
+        @session = session
+        @session_found = session.found?
+        @unlocked = nil
+      end
 
       def allow?(command)
         query = command + '?'
         __send__(query) if respond_to?(query)
+      end
+
+      def allow_transaction?(commands = nil)
+        commands ||= req.commands
+        commands.all? { |command|
+          if allow?(command)
+            pusedo_execute(command)
+            true
+          end
+        }
       end
 
       def setkey?
@@ -55,13 +71,13 @@ module SQRL
       end
 
       def session?
-        errors << "Session required" unless session.found?
-        session.found?
+        errors << "Session required" unless @session_found
+        @session_found
       end
 
       def no_session?
-        errors << "Session already exists" if session.found?
-        !session.found?
+        errors << "Session already exists" if @session_found
+        !@session_found
       end
 
       def idk?
@@ -77,6 +93,20 @@ module SQRL
       def vuk?
         errors << "VUK required" unless req.vuk
         !!req.vuk
+      end
+
+      # psuedo execution
+      def pusedo_execute(command)
+        __send__(command) if respond_to?(command, true)
+      end
+
+      def setlock
+        @unlocked = req.unlocked?(session.vuk)
+      end
+
+      def create
+        @session_found = true
+        @unlocked = true
       end
     end
   end

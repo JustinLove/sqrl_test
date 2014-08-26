@@ -1,4 +1,5 @@
 require 'sqrl/test/commands'
+require 'sqrl/test/permissions'
 require 'sqrl/test/server_sessions'
 require 'sqrl/test/server_key'
 require 'sqrl/query_parser'
@@ -18,6 +19,7 @@ module SQRL
         @sqrl_failure = !valid?
         @session = ServerSessions.for_idk(@req.idk)
         @commands = Commands.new(@req, @session)
+        @permissions = Permissions.new(@req, @session)
       end
 
       attr_reader :session
@@ -49,7 +51,10 @@ module SQRL
       end
 
       def execute_commands
-        return unless valid?
+        unless @permissions.allow_transaction?
+          @command_failed = true
+          return
+        end
 
         @req.commands.each do |command|
           @commands.receive(command)
@@ -87,7 +92,7 @@ module SQRL
           :unrecognized_commands => @commands.unrecognized.join(','),
           :executed_commands => @commands.executed.join(','),
           :unexecuted_commands => @commands.unexecuted.join(','),
-          :ask => @commands.errors.to_a.join(','),
+          :ask => @permissions.errors.to_a.join(','),
           :sessions => ServerSessions.list,
           :request_ip => @request_ip,
           :login_ip => login_ip

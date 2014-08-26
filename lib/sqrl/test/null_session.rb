@@ -8,6 +8,9 @@ module SQRL
       def [](key); nil; end
       def []=(key, value); value; end
 
+      def vuk; nil; end
+      def suk; nil; end
+
       def found?; false; end
       def locked?; false; end
       def setkey(idk); end

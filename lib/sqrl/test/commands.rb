@@ -27,6 +27,12 @@ module SQRL
         executed != recognized
       end
 
+      def execute_transaction(commands = req.commands)
+        commands.each do |command|
+          receive(command)
+        end
+      end
+
       def receive(command)
         if COMMANDS.include?(command)
           recognized << command

@@ -56,9 +56,7 @@ module SQRL
           return
         end
 
-        @req.commands.each do |command|
-          @commands.receive(command)
-        end
+        @commands.execute_transaction
 
         @session = @commands.session
 

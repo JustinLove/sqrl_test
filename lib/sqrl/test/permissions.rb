@@ -25,8 +25,7 @@ module SQRL
         __send__(query) if respond_to?(query)
       end
 
-      def allow_transaction?(commands = nil)
-        commands ||= req.commands
+      def allow_transaction?(commands = req.commands)
         commands.all? { |command|
           if allow?(command)
             pusedo_execute(command)

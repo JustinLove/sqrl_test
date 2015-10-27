@@ -46,10 +46,6 @@ module SQRL
         end
       end
 
-      def logged_in?
-        session[:status] == :logged_in
-      end
-
       def server_unlock_key
         session[:suk]
       end
@@ -75,7 +71,6 @@ module SQRL
         @flags ||= {
           :id_match => session.found?,
           :ip_match => @request_ip == login_ip,
-          :logged_in => logged_in?,
           :creation_allowed => !session.found?,
           :command_failed => @command_failed,
           :sqrl_failure => @sqrl_failure,

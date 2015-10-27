@@ -30,38 +30,12 @@ module SQRL
         end
       end
 
-      def setkey
-        session.setkey(req.idk)
-      end
-
-      def setlock
-        session.setlock(req.suk, req.vuk)
-      end
-
-      def create
-        @session = @session.create(req)
-      end
-
-      def login
-        session.login(req.login_ip)
-      end
-
-      def logout
-        session.logout
-      end
-      alias_method :logoff, :logout
-
       COMMANDS = %w[
-        setkey
-        setlock
         disable
         enable
-        delete
-        create
-        login
-        logme
-        logout
-        logoff
+        ident
+        remove
+        query
       ]
     end
   end

@@ -75,7 +75,6 @@ module SQRL
         @flags ||= {
           :id_match => session.found?,
           :ip_match => @request_ip == login_ip,
-          :login_enabled => session.found?,
           :logged_in => logged_in?,
           :creation_allowed => !session.found?,
           :command_failed => @command_failed,

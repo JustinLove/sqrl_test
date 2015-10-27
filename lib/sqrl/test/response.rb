@@ -16,7 +16,7 @@ module SQRL
         @req.login_ip = login_ip
         p @req.client_data
         @command_failed = !valid?
-        @sqrl_failure = !valid?
+        @client_falure = !valid?
         @session = ServerSessions.for_idk(@req.idk)
 
         @allowed_commands = []
@@ -63,7 +63,7 @@ module SQRL
           @unexecuted_commands = @req.commands - @executed_commands
           @command_failed = true if @executed_commands != @req.commands
         else
-          @sqrl_failure = @command_failed = true
+          @client_failure = @command_failed = true
         end
       end
 
@@ -72,7 +72,7 @@ module SQRL
           :id_match => session.found?,
           :ip_match => @request_ip == login_ip,
           :command_failed => @command_failed,
-          :sqrl_failure => @sqrl_failure,
+          :client_failure => @client_failure,
         }
       end
 

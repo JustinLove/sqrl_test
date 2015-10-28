@@ -42,6 +42,14 @@ module SQRL
         ids?
       end
 
+      def ident?
+        if req.suk && req.vuk
+          ids? && unlocked?
+        else
+          ids?
+        end
+      end
+
       private
 
       def ids?

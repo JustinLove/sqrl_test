@@ -28,6 +28,7 @@ Session state (including "user accounts") is stored in memory and will frequentl
 
 ### Supported Commands:
 
+- ident
 - query
 
 ## Contributing

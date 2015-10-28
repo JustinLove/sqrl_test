@@ -15,6 +15,24 @@ module SQRL
         self[:vuk] && Key::VerifyUnlock.new(self[:vuk])
       end
 
+      def setkey(idk)
+        self[:idk] = idk
+      end
+
+      def setlock(suk, vuk)
+        self[:suk] = suk
+        self[:vuk] = vuk
+      end
+
+      def login(ip)
+        self[:ip] = ip
+        self[:status] = :logged_in
+      end
+
+      def create(req)
+        raise "Cannot create session from an existing session"
+      end
+
       def to_s
         to_h_printable.map {|pair| pair.join(':')}.join(', ')
       end

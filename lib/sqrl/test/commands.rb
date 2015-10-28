@@ -30,6 +30,19 @@ module SQRL
         end
       end
 
+      def ident
+        unless session.found?
+          @session = @session.create(req)
+        end
+        if !session.locked? || req.unlocked?(session.vuk)
+          session.setkey(req.idk)
+          if req.suk && req.vuk
+            session.setlock(req.suk, req.vuk)
+          end
+        end
+        session.login(req.login_ip)
+      end
+
       def query; end
 
       COMMANDS = %w[

@@ -30,6 +30,8 @@ module SQRL
         end
       end
 
+      def query; end
+
       COMMANDS = %w[
         disable
         enable

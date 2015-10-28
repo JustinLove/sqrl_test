@@ -28,6 +28,8 @@ Session state (including "user accounts") is stored in memory and will frequentl
 
 ### Supported Commands:
 
+- query
+
 ## Contributing
 
 1. Fork it

@@ -38,6 +38,10 @@ module SQRL
         commands == allowed_commands(commands)
       end
 
+      def query?
+        ids?
+      end
+
       private
 
       def ids?

@@ -4,26 +4,28 @@ require 'sqrl/test/server_sessions'
 require 'sqrl/test/server_key'
 require 'sqrl/query_parser'
 require 'sqrl/response_generator'
+require 'sqrl/ask'
 require 'sqrl/opaque_nut'
 
 module SQRL
   module Test
     class Response
       def initialize(request_body, request_ip, param_nut)
-        @request_ip = request_ip
-        @param_nut = param_nut
-        @req = SQRL::QueryParser.new(request_body)
-        @req.login_ip = login_ip
-        p @req.client_data
-        @command_failed = !valid?
-        @client_falure = !valid?
-        @session = ServerSessions.for_idk(@req.idk)
-
         @allowed_commands = []
         @disallowed_commands = []
         @executed_commands = []
         @unexecuted_commands = []
         @errors = []
+        @transient_error = false
+
+        @request_ip = request_ip
+        @param_nut = param_nut
+        @req = SQRL::QueryParser.new(request_body)
+        p @req.client_data
+        @command_failed = !valid?
+        @client_failure = !valid?
+        @req.login_ip = login_ip
+        @session = ServerSessions.for_idk(@req.idk)
       end
 
       attr_reader :session
@@ -38,7 +40,13 @@ module SQRL
 
       def login_ip
         if @param_nut
-          SQRL::ReversibleNut.reverse(ServerKey, @param_nut).ip
+          begin
+            return SQRL::ReversibleNut.reverse(ServerKey, @param_nut).ip
+          rescue => e
+            @errors << "Invalid nut"
+            @errors << e.message
+            @client_failure = @command_failed = @transient_error = true
+          end
         elsif session.found?
           session[:ip]
         else
@@ -52,7 +60,7 @@ module SQRL
 
       def execute_commands
         permissions = Permissions.new(@req, @session)
-        @errors = permissions.errors.to_a
+        @errors += permissions.errors.to_a
         @allowed_commands = permissions.allowed_commands
         @disallowed_commands = @req.commands - @allowed_commands
         if @allowed_commands == @req.commands
@@ -73,6 +81,7 @@ module SQRL
           :ip_match => @request_ip == login_ip,
           :command_failed => @command_failed,
           :client_failure => @client_failure,
+          :transient_error => @transient_error,
         }
       end
 
@@ -90,7 +99,7 @@ module SQRL
           :executed_commands => @executed_commands.join(','),
           :unexecuted_commands => @unexecuted_commands.join(','),
           :errors => @errors.join(','),
-          :ask => @errors.join(','),
+          :ask => SQRL::Ask.new(@errors.join(',')),
           :sessions => ServerSessions.list,
           :request_ip => @request_ip,
           :login_ip => login_ip

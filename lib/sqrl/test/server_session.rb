@@ -29,6 +29,11 @@ module SQRL
         self[:status] = :logged_in
       end
 
+      def logout
+        self[:ip] = null
+        self[:status] = :logged_out
+      end
+
       def create(req)
         raise "Cannot create session from an existing session"
       end

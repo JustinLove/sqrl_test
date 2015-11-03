@@ -16,6 +16,7 @@ module SQRL
       def setkey(idk); end
       def setlock(suk, vuk); end
       def login(ip); end
+      def logout; end
 
       def create(req)
         ServerSessions.create(req)

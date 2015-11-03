@@ -25,8 +25,8 @@ module SQRL
 
       get '/' do
         nut = SQRL::ReversibleNut.new(ServerKey, request.ip).to_s
-        auth_url = SQRL::URL.qrl(request.host+':'+request.port.to_s+'/sqrl', nut).to_s
-        auth_url += '&sfn=' + SQRL::Base64.encode('SQRL::Test')
+        auth_url = SQRL::URL.qrl(request.host+':'+request.port.to_s+'/sqrl', {
+          :nut => nut, :sfn => 'SQRL::Test'}).to_s
         if params[:tif_base]
           auth_url += '&tif_base=' + params[:tif_base]
         end

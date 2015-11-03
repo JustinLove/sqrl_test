@@ -24,8 +24,8 @@ module SQRL
         p @req.client_data
         @command_failed = !valid?
         @client_failure = !valid?
-        @req.login_ip = login_ip
         @session = ServerSessions.for_idk(@req.idk)
+        @req.login_ip = login_ip
       end
 
       attr_reader :session

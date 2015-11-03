@@ -70,6 +70,7 @@ module SQRL
         response = Response.new(request.body.read, request.ip, params[:nut])
         response.execute_commands
         res = response.response((params[:tif_base] || 16).to_i)
+        res.fields['qry'] = SQRL::URL.qrl(request.host+':'+request.port.to_s+'/sqrl').to_s
         puts res.server_string
         puts res.response_body
         return res.response_body

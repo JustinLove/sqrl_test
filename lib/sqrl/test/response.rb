@@ -79,9 +79,10 @@ module SQRL
         @flags ||= {
           :id_match => session.found?,
           :ip_match => @request_ip == login_ip,
+          :function_not_supported => (@req.commands & Commands.unsupported_commands).any?,
+          :transient_error => @transient_error,
           :command_failed => @command_failed,
           :client_failure => @client_failure,
-          :transient_error => @transient_error,
         }
       end
 
@@ -92,8 +93,9 @@ module SQRL
           :suk => server_unlock_key,
           :signature_valid => valid?,
           :locked => locked?,
-          :recognized_commands => (@req.commands & Commands::COMMANDS).join(','),
-          :unrecognized_commands => (@req.commands - Commands::COMMANDS).join(','),
+          :supported_commands => (@req.commands & Commands.supported_commands).join(','),
+          :unsupported_commands => (@req.commands & Commands.unsupported_commands).join(','),
+          :unrecognized_commands => (@req.commands - Commands.recognized_commands).join(','),
           :allowed_commands => @allowed_commands.join(','),
           :disallowed_commands => @disallowed_commands.join(','),
           :executed_commands => @executed_commands.join(','),

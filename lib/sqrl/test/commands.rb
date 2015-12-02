@@ -45,6 +45,18 @@ module SQRL
 
       def query; end
 
+      def self.supported_commands
+        COMMANDS.select {|command| instance_methods.include? command.to_sym}
+      end
+
+      def self.unsupported_commands
+        COMMANDS - supported_commands
+      end
+
+      def self.recognized_commands
+        COMMANDS
+      end
+
       COMMANDS = %w[
         disable
         enable

@@ -30,6 +30,14 @@ module SQRL
         end
       end
 
+      def disable
+        session.disable
+      end
+
+      def enable
+        session.enable
+      end
+
       def ident
         unless session.found?
           @session = @session.create(req)

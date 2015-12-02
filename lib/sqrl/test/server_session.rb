@@ -11,6 +11,14 @@ module SQRL
         self[:suk] && self[:vuk]
       end
 
+      def enabled?
+        self[:status] != :disabled
+      end
+
+      def disabled?
+        self[:status] == :disabled
+      end
+
       def vuk
         self[:vuk] && Key::VerifyUnlock.new(self[:vuk])
       end
@@ -31,6 +39,14 @@ module SQRL
 
       def logout
         self[:ip] = null
+        self[:status] = :logged_out
+      end
+
+      def disable
+        self[:status] = :disabled
+      end
+
+      def enable
         self[:status] = :logged_out
       end
 

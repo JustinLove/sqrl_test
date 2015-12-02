@@ -35,16 +35,24 @@ module SQRL
         commands == allowed_commands(commands)
       end
 
-      def query?
+      def disable?
         ids?
+      end
+
+      def enable?
+        ids? && unlocked?
       end
 
       def ident?
         if req.suk && req.vuk
-          ids? && unlocked?
+          ids? && enabled? && unlocked?
         else
-          ids?
+          ids? && enabled?
         end
+      end
+
+      def query?
+        ids?
       end
 
       private
@@ -59,6 +67,11 @@ module SQRL
         @unlocked ||= !session.locked? || req.unlocked?(session.vuk)
         errors << "Session is locked and unlock signature not valid" unless @unlocked
         @unlocked
+      end
+
+      def enabled?
+        errors << "SQRL is disabled for this session" unless session.enabled?
+        session.enabled?
       end
 
       def session?

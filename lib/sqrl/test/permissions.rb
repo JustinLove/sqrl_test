@@ -27,10 +27,7 @@ module SQRL
 
       def allowed_commands(commands = req.commands)
         commands.select { |command|
-          if allow?(command)
-            pusedo_execute(command)
-            true
-          end
+          allow?(command)
         }
       end
 
@@ -87,11 +84,6 @@ module SQRL
       def vuk?
         errors << "VUK required" unless req.vuk
         !!req.vuk
-      end
-
-      # psuedo execution
-      def pusedo_execute(command)
-        __send__(command) if respond_to?(command, true)
       end
     end
   end

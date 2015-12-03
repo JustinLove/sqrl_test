@@ -8,6 +8,7 @@ module SQRL
       def [](key); nil; end
       def []=(key, value); value; end
 
+      def idk; nil; end
       def vuk; nil; end
       def suk; nil; end
 
@@ -21,6 +22,7 @@ module SQRL
       def logout; end
       def disable; end
       def enable; end
+      def remove; end
 
       def create(req)
         ServerSessions.create(req)

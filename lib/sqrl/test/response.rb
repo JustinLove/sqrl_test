@@ -77,7 +77,7 @@ module SQRL
 
       def flags
         @flags ||= {
-          :id_match => session.found?,
+          :id_match => session.idk == @req.idk,
           :ip_match => @request_ip == login_ip,
           :sqrl_disabled => session.disabled?,
           :function_not_supported => (@req.commands & Commands.unsupported_commands).any?,

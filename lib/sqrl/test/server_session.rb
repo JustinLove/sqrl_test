@@ -38,7 +38,7 @@ module SQRL
       end
 
       def logout
-        self[:ip] = null
+        self[:ip] = nil
         self[:status] = :logged_out
       end
 
@@ -48,6 +48,12 @@ module SQRL
 
       def enable
         self[:status] = :logged_out
+      end
+
+      def remove
+        self[:idk] = nil
+        self[:suk] = nil
+        self[:vuk] = nil
       end
 
       def create(req)

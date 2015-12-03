@@ -53,6 +53,10 @@ module SQRL
 
       def query; end
 
+      def remove
+        session.remove
+      end
+
       def self.supported_commands
         COMMANDS.select {|command| instance_methods.include? command.to_sym}
       end

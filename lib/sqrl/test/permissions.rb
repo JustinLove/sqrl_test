@@ -55,6 +55,10 @@ module SQRL
         ids?
       end
 
+      def remove?
+        session? && ids? && unlocked?
+      end
+
       private
 
       def ids?

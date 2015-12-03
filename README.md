@@ -32,6 +32,7 @@ Session state (including "user accounts") is stored in memory and will frequentl
 - enable
 - ident
 - query
+- remove
 
 ## Contributing
 

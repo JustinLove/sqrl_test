@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'rqrcode'
 require 'sqrl/test/response'
+require 'sqrl/test/panic_response'
 require 'sqrl/test/server_key'
 require 'sqrl/reversible_nut'
 require 'sqrl/url'
@@ -69,13 +70,24 @@ module SQRL
       end
 
       post '/sqrl' do
-        response = Response.new(request.body.read, request.ip, params[:nut])
-        response.execute_commands
-        res = response.response((params[:tif_base] || 16).to_i)
-        res.fields['qry'] = '/sqrl'
-        puts res.server_string
-        puts res.response_body
-        return res.response_body
+        begin
+          response = Response.new(request.body.read, request.ip, params[:nut])
+          response.execute_commands
+          res = response.response((params[:tif_base] || 16).to_i)
+          res.fields['qry'] = '/sqrl'
+          puts res.server_string
+          puts res.response_body
+          return res.response_body
+        rescue => e
+          puts "#{e.class}: #{e.message}\n"
+          puts e.backtrace.map { |l| "\t#{l}" }.join("\n")
+
+          response = PanicResponse.new(request.body.read, request.ip, params[:nut])
+          res = response.response((params[:tif_base] || 16).to_i)
+          res.fields['qry'] = '/sqrl'
+          status 500
+          return res.response_body
+        end
       end
     end
   end

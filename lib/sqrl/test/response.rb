@@ -39,19 +39,31 @@ module SQRL
       end
 
       def login_ip
-        if @param_nut
-          begin
-            return SQRL::ReversibleNut.reverse(ServerKey, @param_nut).ip
-          rescue => e
-            @errors << "Invalid nut"
-            @errors << e.message
-            @client_failure = @command_failed = @transient_error = true
-          end
+        @login_ip ||= if param_nut
+          param_nut.ip
         elsif session.found?
           session[:ip]
         else
           @request_ip
         end
+      end
+
+      def nut_age
+        if param_nut
+          param_nut.age
+        else
+          0
+        end
+      end
+
+      def param_nut
+        return nil unless @param_nut
+        @reversed_nut ||= SQRL::ReversibleNut.reverse(ServerKey, @param_nut)
+      rescue => e
+        @errors << "Invalid nut"
+        @errors << e.message
+        @client_failure = @command_failed = @transient_error = true
+        nil
       end
 
       def server_unlock_key
@@ -63,7 +75,11 @@ module SQRL
         @errors += permissions.errors.to_a
         @allowed_commands = permissions.allowed_commands
         @disallowed_commands = @req.commands - @allowed_commands
-        if @allowed_commands == @req.commands
+
+        if nut_age > 60*30
+          @errors << "Expired Nut"
+          @client_failure = @command_failed = @transient_error = true
+        elsif @allowed_commands == @req.commands
           commands = Commands.new(@req, @session)
           commands.execute_transaction
           @session = commands.session

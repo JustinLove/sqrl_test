@@ -31,7 +31,7 @@ module SQRL
         if params[:tif_base]
           auth_url += '&tif_base=' + params[:tif_base]
         end
-        ss = ServerSessions.for_ip(request.ip)
+        ss = Accounts.for_ip(request.ip)
         if ss[:status] == :logged_in
           erb :logged_in, :locals => {
             :props => ss.to_h_printable,
@@ -46,7 +46,7 @@ module SQRL
       end
 
       get '/logout' do
-        ServerSessions.for_ip(request.ip).logout
+        Accounts.for_ip(request.ip).logout
         redirect to('/')
       end
 

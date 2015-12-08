@@ -4,7 +4,7 @@ require 'sqrl/key/verify_unlock'
 
 module SQRL
   module Test
-    class ServerSession < OpenStruct
+    class Account < OpenStruct
       def found?; true; end
 
       def locked?
@@ -57,7 +57,7 @@ module SQRL
       end
 
       def create(req)
-        raise "Cannot create session from an existing session"
+        raise "Cannot create account from an existing account"
       end
 
       def to_s

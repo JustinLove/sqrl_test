@@ -1,6 +1,6 @@
 require 'sqrl/test/commands'
 require 'sqrl/test/permissions'
-require 'sqrl/test/server_sessions'
+require 'sqrl/test/accounts'
 require 'sqrl/test/server_key'
 require 'sqrl/query_parser'
 require 'sqrl/response_generator'
@@ -24,25 +24,25 @@ module SQRL
         p @req.client_data
         @command_failed = !valid?
         @client_failure = !valid?
-        @session = ServerSessions.for_idk(@req.idk)
+        @account = Accounts.for_idk(@req.idk)
         @req.login_ip = login_ip
       end
 
-      attr_reader :session
+      attr_reader :account
 
       def valid?
         @req.valid?
       end
 
       def locked?
-        session.locked? && !@req.unlocked?(session.vuk)
+        account.locked? && !@req.unlocked?(account.vuk)
       end
 
       def login_ip
         @login_ip ||= if param_nut
           param_nut.ip
-        elsif session.found?
-          session[:ip]
+        elsif account.found?
+          account[:ip]
         else
           @request_ip
         end
@@ -67,11 +67,11 @@ module SQRL
       end
 
       def server_unlock_key
-        session[:suk]
+        account[:suk]
       end
 
       def execute_commands
-        permissions = Permissions.new(@req, @session)
+        permissions = Permissions.new(@req, @account)
         @errors += permissions.errors.to_a
         @allowed_commands = permissions.allowed_commands
         @disallowed_commands = @req.commands - @allowed_commands
@@ -80,9 +80,9 @@ module SQRL
           @errors << "Expired Nut"
           @client_failure = @command_failed = @transient_error = true
         elsif @allowed_commands == @req.commands
-          commands = Commands.new(@req, @session)
+          commands = Commands.new(@req, @account)
           commands.execute_transaction
-          @session = commands.session
+          @account = commands.account
           @executed_commands = commands.executed
           @unexecuted_commands = @req.commands - @executed_commands
           @command_failed = true if @executed_commands != @req.commands
@@ -93,9 +93,9 @@ module SQRL
 
       def flags
         @flags ||= {
-          :id_match => session.idk == @req.idk,
+          :id_match => account.idk == @req.idk,
           :ip_match => @request_ip == login_ip,
-          :sqrl_disabled => session.disabled?,
+          :sqrl_disabled => account.disabled?,
           :function_not_supported => (@req.commands & Commands.unsupported_commands).any?,
           :transient_error => @transient_error,
           :command_failed => @command_failed,
@@ -119,7 +119,7 @@ module SQRL
           :unexecuted_commands => @unexecuted_commands.join(','),
           :errors => @errors.join(','),
           :ask => SQRL::Ask.new(@errors.join(',')),
-          :sessions => ServerSessions.list,
+          :accounts => Accounts.list,
           :request_ip => @request_ip,
           :login_ip => login_ip
         }.merge(flags))

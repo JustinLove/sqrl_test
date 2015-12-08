@@ -1,14 +1,14 @@
 module SQRL
   module Test
     class Commands
-      def initialize(req, session)
+      def initialize(req, account)
         @req = req
-        @session = session
+        @account = account
         @executed = []
       end
 
       attr_reader :req
-      attr_reader :session
+      attr_reader :account
       attr_reader :executed
 
       def execute_transaction(commands = req.commands)
@@ -31,30 +31,30 @@ module SQRL
       end
 
       def disable
-        session.disable
+        account.disable
       end
 
       def enable
-        session.enable
+        account.enable
       end
 
       def ident
-        unless session.found?
-          @session = @session.create(req)
+        unless account.found?
+          @account = @account.create(req)
         end
-        if !session.locked? || req.unlocked?(session.vuk)
-          session.setkey(req.idk)
+        if !account.locked? || req.unlocked?(account.vuk)
+          account.setkey(req.idk)
           if req.suk && req.vuk
-            session.setlock(req.suk, req.vuk)
+            account.setlock(req.suk, req.vuk)
           end
         end
-        session.login(req.login_ip)
+        account.login(req.login_ip)
       end
 
       def query; end
 
       def remove
-        session.remove
+        account.remove
       end
 
       def self.supported_commands

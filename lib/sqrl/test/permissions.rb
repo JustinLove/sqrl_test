@@ -3,20 +3,20 @@ require 'set'
 module SQRL
   module Test
     class Permissions
-      def initialize(req, session)
+      def initialize(req, account)
         @req = req
-        self.session = session
+        self.account = account
         @errors = Set.new
       end
 
       attr_reader :req
-      attr_reader :session
+      attr_reader :account
 
       attr_reader :errors
 
-      def session=(session)
-        @session = session
-        @session_found = session.found?
+      def account=(account)
+        @account = account
+        @account_found = account.found?
         @unlocked = nil
       end
 
@@ -56,7 +56,7 @@ module SQRL
       end
 
       def remove?
-        session? && ids? && unlocked?
+        account? && ids? && unlocked?
       end
 
       private
@@ -68,24 +68,24 @@ module SQRL
       end
 
       def unlocked?
-        @unlocked ||= !session.locked? || req.unlocked?(session.vuk)
-        errors << "Session is locked and unlock signature not valid" unless @unlocked
+        @unlocked ||= !account.locked? || req.unlocked?(account.vuk)
+        errors << "Account is locked and unlock signature not valid" unless @unlocked
         @unlocked
       end
 
       def enabled?
-        errors << "SQRL is disabled for this session" unless session.enabled?
-        session.enabled?
+        errors << "SQRL is disabled for this account" unless account.enabled?
+        account.enabled?
       end
 
-      def session?
-        errors << "Session required" unless @session_found
-        @session_found
+      def account?
+        errors << "Account required" unless @account_found
+        @account_found
       end
 
-      def no_session?
-        errors << "Session already exists" if @session_found
-        !@session_found
+      def no_account?
+        errors << "Account already exists" if @account_found
+        !@account_found
       end
 
       def idk?

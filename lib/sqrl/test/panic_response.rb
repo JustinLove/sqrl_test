@@ -13,7 +13,7 @@ module SQRL
         p @req.client_data
       end
 
-      attr_reader :session
+      attr_reader :account
 
       def valid?
         @req.valid?

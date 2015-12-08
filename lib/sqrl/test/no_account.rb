@@ -1,8 +1,8 @@
-require 'sqrl/test/server_sessions'
+require 'sqrl/test/accounts'
 
 module SQRL
   module Test
-    module NullSession
+    module NoAccount
       extend self
 
       def [](key); nil; end
@@ -25,10 +25,10 @@ module SQRL
       def remove; end
 
       def create(req)
-        ServerSessions.create(req)
+        Accounts.create(req)
       end
 
-      def to_s; 'NullSession'; end
+      def to_s; 'NoAccount'; end
     end
   end
 end

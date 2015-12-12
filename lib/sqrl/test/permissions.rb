@@ -3,14 +3,16 @@ require 'set'
 module SQRL
   module Test
     class Permissions
-      def initialize(req, account)
+      def initialize(req, account, login_session)
         @req = req
         self.account = account
+        self.login_session = login_session
         @errors = Set.new
       end
 
       attr_reader :req
       attr_reader :account
+      attr_reader :login_session
 
       attr_reader :errors
 
@@ -18,6 +20,11 @@ module SQRL
         @account = account
         @account_found = account.found?
         @unlocked = nil
+      end
+
+      def login_session=(login_session)
+        @login_session = login_session
+        @session_found = login_session.found?
       end
 
       def allow?(command)
@@ -44,10 +51,9 @@ module SQRL
       end
 
       def ident?
+        return false unless login_session? && ids? && enabled?
         if req.suk && req.vuk
-          ids? && enabled? && unlocked?
-        else
-          ids? && enabled?
+          unlocked?
         end
       end
 
@@ -76,6 +82,11 @@ module SQRL
       def enabled?
         errors << "SQRL is disabled for this account" unless account.enabled?
         account.enabled?
+      end
+
+      def login_session?
+        errors << "Login Session required" unless @session_found
+        @session_found
       end
 
       def account?

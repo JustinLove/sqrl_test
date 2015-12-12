@@ -18,8 +18,6 @@ module SQRL
       def disabled?; false; end
       def setkey(idk); end
       def setlock(suk, vuk); end
-      def login(ip); end
-      def logout; end
       def disable; end
       def enable; end
       def remove; end

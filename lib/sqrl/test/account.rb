@@ -32,22 +32,12 @@ module SQRL
         self[:vuk] = vuk
       end
 
-      def login(ip)
-        self[:ip] = ip
-        self[:status] = :logged_in
-      end
-
-      def logout
-        self[:ip] = nil
-        self[:status] = :logged_out
-      end
-
       def disable
         self[:status] = :disabled
       end
 
       def enable
-        self[:status] = :logged_out
+        self[:status] = :known
       end
 
       def remove

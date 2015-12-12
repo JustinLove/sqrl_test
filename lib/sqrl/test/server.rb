@@ -1,9 +1,9 @@
 require 'sinatra/base'
 require 'rqrcode'
+require 'sqrl/test/pending_sessions'
 require 'sqrl/test/response'
 require 'sqrl/test/panic_response'
-require 'sqrl/test/server_key'
-require 'sqrl/reversible_nut'
+require 'sqrl/opaque_nut'
 require 'sqrl/url'
 require 'sqrl/base64'
 
@@ -17,24 +17,32 @@ module SQRL
       valid?
     ]
     class Server < Sinatra::Base
-      enable :session
+      #enable :session
+      class Rack::Session::Pool
+        def call(env)
+          env['session.object'] = self
+          super
+        end
+      end
+      use Rack::Session::Pool, :expire_after => 2592000
 
       configure do 
-        mime_type :ics, 'text/calendar'
         STDOUT.sync = true
       end
 
       get '/' do
-        nut = SQRL::ReversibleNut.new(ServerKey, request.ip).to_s
+        nut = SQRL::OpaqueNut.new.to_s
         auth_url = SQRL::URL.qrl(request.host+':'+request.port.to_s+'/sqrl', {
           :nut => nut, :sfn => 'SQRL::Test'}).to_s
         if params[:tif_base]
           auth_url += '&tif_base=' + params[:tif_base]
         end
-        ss = Accounts.for_ip(request.ip)
-        if ss[:status] == :logged_in
+        login_session = WebSession.new(session, request.ip)
+        PendingSessions.record(auth_url, login_session)
+        if login_session.logged_in?
+          account = Accounts.for_idk(login_session.idk)
           erb :logged_in, :locals => {
-            :props => ss.to_h_printable,
+            :props => account.to_h_printable,
           }
         else
           erb :index, :locals => {
@@ -51,7 +59,7 @@ module SQRL
       end
 
       post '/sqrl.html' do
-        nut = SQRL::ReversibleNut.reverse(ServerKey, params[:nut])
+        nut = params[:nut]
         req = SQRL::QueryParser.new(request.body.read)
         props = Hash[RequestProperties.map {|prop| [prop, req.__send__(prop)]}]
         props['signature valid'] = req.valid?
@@ -59,9 +67,7 @@ module SQRL
         props['post ip'] = request.ip
         props['url'] = request.url
         props['fullpath'] = request.fullpath
-        props['nut'] = params[:nut]
-        props['login ip'] = nut.ip
-        props['age'] = nut.age
+        props['nut'] = nut
         props['methods'] = request.methods.sort - Object.instance_methods
         erb :report, :locals => {
           :req => req,
@@ -70,11 +76,16 @@ module SQRL
       end
 
       post '/sqrl' do
+        login_session = NullSession
         begin
-          response = Response.new(request.body.read, request.ip, params[:nut])
+          req = SQRL::QueryParser.new(request.body.read)
+          p req.client_data
+          login_session = PendingSessions.consume(req.server_string)
+          response = Response.new(req, request.ip, login_session.ip, login_session)
           response.execute_commands
           res = response.response((params[:tif_base] || 16).to_i)
           res.fields['qry'] = '/sqrl'
+          PendingSessions.record(res.server_string, login_session)
           puts res.server_string
           puts res.response_body
           return res.response_body
@@ -82,9 +93,10 @@ module SQRL
           puts "#{e.class}: #{e.message}\n"
           puts e.backtrace.map { |l| "\t#{l}" }.join("\n")
 
-          response = PanicResponse.new(request.body.read, request.ip, params[:nut])
+          response = PanicResponse.new(request.body.read, request.ip)
           res = response.response((params[:tif_base] || 16).to_i)
           res.fields['qry'] = '/sqrl'
+          PendingSessions.record(res.server_string, login_session)
           status 500
           return res.response_body
         end

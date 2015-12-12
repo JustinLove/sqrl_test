@@ -1,7 +1,6 @@
 require 'sqrl/test/commands'
 require 'sqrl/test/permissions'
 require 'sqrl/test/accounts'
-require 'sqrl/test/server_key'
 require 'sqrl/query_parser'
 require 'sqrl/response_generator'
 require 'sqrl/ask'
@@ -10,7 +9,7 @@ require 'sqrl/opaque_nut'
 module SQRL
   module Test
     class Response
-      def initialize(request_body, request_ip, param_nut)
+      def initialize(req, request_ip, login_ip, login_session)
         @allowed_commands = []
         @disallowed_commands = []
         @executed_commands = []
@@ -18,17 +17,18 @@ module SQRL
         @errors = []
         @transient_error = false
 
+        @req = req
         @request_ip = request_ip
-        @param_nut = param_nut
-        @req = SQRL::QueryParser.new(request_body)
-        p @req.client_data
+        @login_ip = login_ip
+        @login_session = login_session
         @command_failed = !valid?
         @client_failure = !valid?
         @account = Accounts.for_idk(@req.idk)
-        @req.login_ip = login_ip
       end
 
       attr_reader :account
+      attr_reader :login_session
+      attr_reader :login_ip
 
       def valid?
         @req.valid?
@@ -38,32 +38,8 @@ module SQRL
         account.locked? && !@req.unlocked?(account.vuk)
       end
 
-      def login_ip
-        @login_ip ||= if param_nut
-          param_nut.ip
-        elsif account.found?
-          account[:ip]
-        else
-          @request_ip
-        end
-      end
-
-      def nut_age
-        if param_nut
-          param_nut.age
-        else
-          0
-        end
-      end
-
-      def param_nut
-        return nil unless @param_nut
-        @reversed_nut ||= SQRL::ReversibleNut.reverse(ServerKey, @param_nut)
-      rescue => e
-        @errors << "Invalid nut"
-        @errors << e.message
-        @client_failure = @command_failed = @transient_error = true
-        nil
+      def server_string
+        @req.server_string
       end
 
       def server_unlock_key
@@ -71,16 +47,13 @@ module SQRL
       end
 
       def execute_commands
-        permissions = Permissions.new(@req, @account)
+        permissions = Permissions.new(@req, @account, @login_session)
         @errors += permissions.errors.to_a
         @allowed_commands = permissions.allowed_commands
         @disallowed_commands = @req.commands - @allowed_commands
 
-        if nut_age > 60*30
-          @errors << "Expired Nut"
-          @client_failure = @command_failed = @transient_error = true
-        elsif @allowed_commands == @req.commands
-          commands = Commands.new(@req, @account)
+        if @allowed_commands == @req.commands
+          commands = Commands.new(@req, @account, @login_session)
           commands.execute_transaction
           @account = commands.account
           @executed_commands = commands.executed
@@ -104,11 +77,13 @@ module SQRL
       end
 
       def response(base = 16)
-        res_nut = SQRL::OpaqueNut.new
-        response = SQRL::ResponseGenerator.new(res_nut, flags, {
+        res_nut = SQRL::OpaqueNut.new.to_s
+        flag = flags
+        response = SQRL::ResponseGenerator.new(res_nut, flag, {
           :sfn => 'SQRL::Test',
           :suk => server_unlock_key,
           :signature_valid => valid?,
+          :nut_valid => @login_session.found?,
           :locked => locked?,
           :supported_commands => (@req.commands & Commands.supported_commands).join(','),
           :unsupported_commands => (@req.commands & Commands.unsupported_commands).join(','),
@@ -122,7 +97,7 @@ module SQRL
           :accounts => Accounts.list,
           :request_ip => @request_ip,
           :login_ip => login_ip
-        }.merge(flags))
+        }.merge(flag))
         response.tif_base = base
         response
       end

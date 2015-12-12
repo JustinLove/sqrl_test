@@ -1,14 +1,16 @@
 module SQRL
   module Test
     class Commands
-      def initialize(req, account)
+      def initialize(req, account, login_session)
         @req = req
         @account = account
+        @login_session = login_session
         @executed = []
       end
 
       attr_reader :req
       attr_reader :account
+      attr_reader :login_session
       attr_reader :executed
 
       def execute_transaction(commands = req.commands)
@@ -48,7 +50,7 @@ module SQRL
             account.setlock(req.suk, req.vuk)
           end
         end
-        account.login(req.login_ip)
+        login_session.login(account)
       end
 
       def query; end

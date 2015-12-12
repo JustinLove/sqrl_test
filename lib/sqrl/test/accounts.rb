@@ -8,10 +8,6 @@ module SQRL
     module Accounts
       extend self
 
-      def for_ip(ip)
-        find_ip(ip) || NoAccount
-      end
-
       def for_idk(idk)
         find_idk(idk) || NoAccount
       end
@@ -21,16 +17,12 @@ module SQRL
       end
 
       def create(req)
-        account = Account.new(:ip => req.login_ip, :status => :known)
+        account = Account.new(:status => :known)
         $accounts << account
         account
       end
 
       private
-      def find_ip(ip)
-        $accounts.find {|s| s[:ip] == ip}
-      end
-
       def find_idk(idk)
         $accounts.find {|s| s[:idk] == idk}
       end

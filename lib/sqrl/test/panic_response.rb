@@ -6,9 +6,8 @@ require 'sqrl/opaque_nut'
 module SQRL
   module Test
     class PanicResponse
-      def initialize(request_body, request_ip, param_nut)
+      def initialize(request_body, request_ip)
         @request_ip = request_ip
-        @param_nut = param_nut
         @req = SQRL::QueryParser.new(request_body)
         p @req.client_data
       end
@@ -26,7 +25,7 @@ module SQRL
       end
 
       def response(base = 16)
-        res_nut = SQRL::OpaqueNut.new
+        res_nut = SQRL::OpaqueNut.new.to_s
         response = SQRL::ResponseGenerator.new(res_nut, flags, {
           :sfn => 'SQRL::Test',
           :signature_valid => valid?,

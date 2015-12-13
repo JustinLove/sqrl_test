@@ -80,9 +80,8 @@ module SQRL
       def response(base = 16)
         res_nut = SQRL::OpaqueNut.new.to_s
         flag = flags
-        response = SQRL::ResponseGenerator.new(res_nut, flag, {
+        fields = {
           :sfn => 'SQRL::Test',
-          :suk => server_unlock_key,
           :signature_valid => valid?,
           :nut_valid => @login_session.found?,
           :bound_to_login_session => @login_session.login_capable?,
@@ -99,7 +98,11 @@ module SQRL
           :accounts => Accounts.list,
           :request_ip => @request_ip,
           :login_ip => login_ip
-        }.merge(flag))
+        }.merge(flag)
+        if account.disabled?
+          fields[:suk] = server_unlock_key
+        end
+        response = SQRL::ResponseGenerator.new(res_nut, flag, fields)
         response.tif_base = base
         response
       end

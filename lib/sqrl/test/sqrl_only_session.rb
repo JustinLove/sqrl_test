@@ -1,6 +1,6 @@
 module SQRL
   module Test
-    class WebSession
+    class SqrlOnlySession
       def initialize(session, ip)
         @session = session
         @ip = ip
@@ -21,25 +21,11 @@ module SQRL
         age_in_seconds > 60*30
       end
 
-      def login(account)
-        @session['idk'] = account.idk
-      end
-
-      def logout
-        @session.delete('idk')
-      end
-
-      def logged_in?
-        @session['idk']
-      end
-
-      def idk
-        @session['idk']
-      end
-
-      def login_capable?
-        true
-      end
+      def login(account); end
+      def logout; end
+      def logged_in?; false; end
+      def login_capable?; false; end
+      def idk; ''; end
 
       private
       attr_reader :ts

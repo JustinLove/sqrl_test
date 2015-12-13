@@ -1,6 +1,8 @@
 require 'sinatra/base'
 require 'rqrcode'
 require 'sqrl/test/pending_sessions'
+require 'sqrl/test/web_session'
+require 'sqrl/test/sqrl_only_session'
 require 'sqrl/test/response'
 require 'sqrl/test/panic_response'
 require 'sqrl/opaque_nut'
@@ -80,12 +82,17 @@ module SQRL
         begin
           req = SQRL::QueryParser.new(request.body.read)
           p req.client_data
+          PendingSessions.expire!
           login_session = PendingSessions.consume(req.server_string)
           response = Response.new(req, request.ip, login_session.ip, login_session)
           response.execute_commands
           res = response.response((params[:tif_base] || 16).to_i)
           res.fields['qry'] = '/sqrl'
-          PendingSessions.record(res.server_string, login_session)
+          if login_session.found?
+            PendingSessions.record(res.server_string, login_session)
+          else
+            PendingSessions.record(res.server_string, SqrlOnlySession.new(session, request.ip))
+          end
           puts res.server_string
           puts res.response_body
           return res.response_body
@@ -96,7 +103,11 @@ module SQRL
           response = PanicResponse.new(request.body.read, request.ip)
           res = response.response((params[:tif_base] || 16).to_i)
           res.fields['qry'] = '/sqrl'
-          PendingSessions.record(res.server_string, login_session)
+          if login_session.found?
+            PendingSessions.record(res.server_string, login_session)
+          else
+            PendingSessions.record(res.server_string, SqrlOnlySession.new(session, request.ip))
+          end
           status 500
           return res.response_body
         end

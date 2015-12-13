@@ -8,6 +8,7 @@ module SQRL
         self.account = account
         self.login_session = login_session
         @errors = Set.new
+        @transient_error = false
       end
 
       attr_reader :req
@@ -15,6 +16,7 @@ module SQRL
       attr_reader :login_session
 
       attr_reader :errors
+      attr_reader :transient_error
 
       def account=(account)
         @account = account
@@ -24,7 +26,6 @@ module SQRL
 
       def login_session=(login_session)
         @login_session = login_session
-        @session_found = login_session.found?
       end
 
       def allow?(command)
@@ -43,11 +44,11 @@ module SQRL
       end
 
       def disable?
-        ids?
+        session? && ids?
       end
 
       def enable?
-        ids? && unlocked?
+        session? && ids? && unlocked?
       end
 
       def ident?
@@ -58,11 +59,11 @@ module SQRL
       end
 
       def query?
-        ids?
+        session? && ids?
       end
 
       def remove?
-        account? && ids? && unlocked?
+        session? && ids? && account? && unlocked?
       end
 
       private
@@ -84,9 +85,17 @@ module SQRL
         account.enabled?
       end
 
+      def session?
+        return true if login_session.found?
+
+        errors << "Valid server string required"
+        @transient_error = true
+        false
+      end
+
       def login_session?
-        errors << "Login Session required" unless @session_found
-        @session_found
+        errors << "The provided server string is not tied to a login session, so I don't know which one to login to." unless login_session.login_capable?
+        login_session.login_capable?
       end
 
       def account?

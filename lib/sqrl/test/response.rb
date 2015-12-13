@@ -48,9 +48,10 @@ module SQRL
 
       def execute_commands
         permissions = Permissions.new(@req, @account, @login_session)
-        @errors += permissions.errors.to_a
         @allowed_commands = permissions.allowed_commands
         @disallowed_commands = @req.commands - @allowed_commands
+        @errors += permissions.errors.to_a
+        @transient_error = permissions.transient_error
 
         if @allowed_commands == @req.commands
           commands = Commands.new(@req, @account, @login_session)
@@ -84,6 +85,7 @@ module SQRL
           :suk => server_unlock_key,
           :signature_valid => valid?,
           :nut_valid => @login_session.found?,
+          :bound_to_login_session => @login_session.login_capable?,
           :locked => locked?,
           :supported_commands => (@req.commands & Commands.supported_commands).join(','),
           :unsupported_commands => (@req.commands & Commands.unsupported_commands).join(','),

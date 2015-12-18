@@ -23,7 +23,9 @@ module SQRL
         @login_session = login_session
         @command_failed = !valid?
         @client_failure = !valid?
-        @account = Accounts.for_idk(@req.idk)
+        @primary_account = Accounts.for_idk(@req.idk)
+        @previous_account = Accounts.for_idk(@req.pidk)
+        @account = @primary_account || @previous_account
       end
 
       attr_reader :account
@@ -67,7 +69,8 @@ module SQRL
 
       def flags
         @flags ||= {
-          :id_match => account.idk == @req.idk,
+          :id_match => @primary_account.idk == @req.idk,
+          :previous_id_match => @previous_account.idk == @req.pidk,
           :ip_match => @request_ip == login_ip,
           :sqrl_disabled => account.disabled?,
           :function_not_supported => (@req.commands & Commands.unsupported_commands).any?,

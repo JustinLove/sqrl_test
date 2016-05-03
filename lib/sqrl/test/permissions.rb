@@ -56,6 +56,7 @@ module SQRL
         if req.suk && req.vuk
           unlocked?
         end
+        return true
       end
 
       def query?

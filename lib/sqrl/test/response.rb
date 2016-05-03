@@ -25,7 +25,11 @@ module SQRL
         @client_failure = !valid?
         @primary_account = Accounts.for_idk(@req.idk)
         @previous_account = Accounts.for_idk(@req.pidk)
-        @account = @primary_account || @previous_account
+        if @primary_account.found?
+          @account = @primary_account
+        else
+          @account = @previous_account
+        end
       end
 
       attr_reader :account

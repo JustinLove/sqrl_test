@@ -100,6 +100,7 @@ module SQRL
           :disallowed_commands => @disallowed_commands.join(','),
           :executed_commands => @executed_commands.join(','),
           :unexecuted_commands => @unexecuted_commands.join(','),
+          :options => @req.options.join(','),
           :errors => @errors.join(','),
           :ask => SQRL::Ask.new(@errors.join(',')),
           :accounts => Accounts.list,

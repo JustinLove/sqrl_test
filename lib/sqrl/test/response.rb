@@ -44,6 +44,14 @@ module SQRL
         account.locked? && !@req.unlocked?(account.vuk)
       end
 
+      def known_by_previous?
+        @previous_account.found? && !@primary_account.found?
+      end
+
+      def suk_required?
+        account.disabled? || known_by_previous? || @req.opt?('suk')
+      end
+
       def server_string
         @req.server_string
       end
@@ -107,7 +115,7 @@ module SQRL
           :request_ip => @request_ip,
           :login_ip => login_ip
         }.merge(flag)
-        if account.disabled? || (@previous_account.found? && !@primary_account.found?)
+        if suk_required?
           fields[:suk] = server_unlock_key
         end
         response = SQRL::ResponseGenerator.new(res_nut, flag, fields)

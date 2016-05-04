@@ -106,7 +106,7 @@ module SQRL
           :request_ip => @request_ip,
           :login_ip => login_ip
         }.merge(flag)
-        if account.disabled?
+        if account.disabled? || (@previous_account.found? && !@primary_account.found?)
           fields[:suk] = server_unlock_key
         end
         response = SQRL::ResponseGenerator.new(res_nut, flag, fields)

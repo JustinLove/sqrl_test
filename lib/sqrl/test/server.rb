@@ -49,7 +49,7 @@ module SQRL
       end
 
       get '/logout' do
-        Accounts.for_ip(request.ip).logout
+        ManualSessions.fetch(session_id, request.ip).logout
         redirect to('/')
       end
 

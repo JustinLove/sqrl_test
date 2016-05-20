@@ -1,20 +1,25 @@
 module SQRL
   module Test
     class WebSession
-      def initialize(session, ip)
+      def initialize(session)
         @session = session
-        @ip = ip
         touch
       end
-
-      attr_reader :ip
 
       def found?
         @session && !expired?
       end
 
+      def id
+        @session['id']
+      end
+
+      def ip
+        @session['ip']
+      end
+
       def touch
-        @ts = Time.now
+        @session['ts'] = Time.now
       end
 
       def expired?
@@ -22,7 +27,7 @@ module SQRL
       end
 
       def login(account)
-        @session['idk'] = account.idk
+        @session['idk'] = account.idk if login_capable?
       end
 
       def logout
@@ -38,11 +43,22 @@ module SQRL
       end
 
       def login_capable?
-        true
+        !!id
+      end
+
+      def server_string=(ss)
+        @session['server_string'] = ss
+      end
+
+      def to_h
+        return @session
       end
 
       private
-      attr_reader :ts
+
+      def ts
+        @session['ts']
+      end
 
       def age_in_seconds
         Time.now - ts

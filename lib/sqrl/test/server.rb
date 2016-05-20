@@ -1,8 +1,8 @@
 require 'sinatra/base'
 require 'rqrcode'
-require 'sqrl/test/pending_sessions'
+require 'sqrl/test/manual_sessions'
+require 'sqrl/test/null_session'
 require 'sqrl/test/web_session'
-require 'sqrl/test/sqrl_only_session'
 require 'sqrl/test/response'
 require 'sqrl/test/panic_response'
 require 'sqrl/opaque_nut'
@@ -19,14 +19,7 @@ module SQRL
       valid?
     ]
     class Server < Sinatra::Base
-      #enable :session
-      class Rack::Session::Pool
-        def call(env)
-          env['session.object'] = self
-          super
-        end
-      end
-      use Rack::Session::Pool, :expire_after => 2592000
+      enable :sessions
 
       configure do 
         STDOUT.sync = true
@@ -39,8 +32,8 @@ module SQRL
         if params[:tif_base]
           auth_url += '&tif_base=' + params[:tif_base]
         end
-        login_session = WebSession.new(session, request.ip)
-        PendingSessions.record(auth_url, login_session)
+        login_session = ManualSessions.fetch(session_id, request.ip)
+        ManualSessions.record(auth_url, login_session)
         if login_session.logged_in?
           account = Accounts.for_idk(login_session.idk)
           erb :logged_in, :locals => {
@@ -81,17 +74,16 @@ module SQRL
         login_session = NullSession
         begin
           req = SQRL::QueryParser.new(request.body.read)
-          p req.client_data
-          PendingSessions.expire!
-          login_session = PendingSessions.consume(req.server_string)
+          ManualSessions.expire!
+          login_session = ManualSessions.consume(req.server_string)
           response = Response.new(req, request.ip, login_session.ip, login_session)
           response.execute_commands
           res = response.response((params[:tif_base] || 16).to_i)
           res.fields['qry'] = '/sqrl'
           if login_session.found?
-            PendingSessions.record(res.server_string, login_session)
+            ManualSessions.record(res.server_string, login_session)
           else
-            PendingSessions.record(res.server_string, SqrlOnlySession.new(session, request.ip))
+            ManualSessions.record(res.server_string, WebSession.new({'ip' => request.ip}))
           end
           puts res.server_string
           puts res.response_body
@@ -104,13 +96,17 @@ module SQRL
           res = response.response((params[:tif_base] || 16).to_i)
           res.fields['qry'] = '/sqrl'
           if login_session.found?
-            PendingSessions.record(res.server_string, login_session)
+            ManualSessions.record(res.server_string, login_session)
           else
-            PendingSessions.record(res.server_string, SqrlOnlySession.new(session, request.ip))
+            ManualSessions.record(res.server_string, WebSession.new({'ip' => request.ip}))
           end
           status 500
           return res.response_body
         end
+      end
+
+      def session_id
+        session['id'] ||= SecureRandom.urlsafe_base64
       end
     end
   end

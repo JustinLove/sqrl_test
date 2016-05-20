@@ -5,6 +5,7 @@ module SQRL
 
       def found?; false; end
 
+      def id; nil; end
       def touch; end
       def expired?; true; end
       def ip; ''; end
@@ -13,6 +14,7 @@ module SQRL
       def logged_in?; false; end
       def idk; end
       def login_capable?; false; end
+      def server_string=; end
     end
   end
 end

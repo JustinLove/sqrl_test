@@ -33,7 +33,7 @@ module SQRL
           auth_url += '&tif_base=' + params[:tif_base]
         end
         login_session = ManualSessions.fetch(session_id, request.ip)
-        ManualSessions.record(auth_url, login_session)
+        ManualSessions.sqrl_record(auth_url, login_session)
         if login_session.logged_in?
           account = Accounts.for_idk(login_session.idk)
           erb :logged_in, :locals => {
@@ -50,6 +50,15 @@ module SQRL
 
       get '/logout' do
         ManualSessions.fetch(session_id, request.ip).logout
+        redirect to('/')
+      end
+
+      get '/token/:token' do |token|
+        ses = ManualSessions.token_consume(token)
+        if ses.found?
+          ses.id = session_id
+          ManualSessions.save(ses)
+        end
         redirect to('/')
       end
 
@@ -75,15 +84,18 @@ module SQRL
         begin
           req = SQRL::QueryParser.new(request.body.read)
           ManualSessions.expire!
-          login_session = ManualSessions.consume(req.server_string)
+          login_session = ManualSessions.sqrl_consume(req.server_string)
           response = Response.new(req, request.ip, login_session.ip, login_session)
           response.execute_commands
           res = response.response((params[:tif_base] || 16).to_i)
           res.fields['qry'] = '/sqrl'
+          unless req.commands.include?('query')
+            res.fields['url'] = "#{request.base_url}/token/#{login_session.generate_token}"
+          end
           if login_session.found?
-            ManualSessions.record(res.server_string, login_session)
+            ManualSessions.sqrl_record(res.server_string, login_session)
           else
-            ManualSessions.record(res.server_string, WebSession.new({'ip' => request.ip}))
+            ManualSessions.sqrl_record(res.server_string, WebSession.new({'ip' => request.ip}))
           end
           puts res.server_string
           puts res.response_body
@@ -96,9 +108,9 @@ module SQRL
           res = response.response((params[:tif_base] || 16).to_i)
           res.fields['qry'] = '/sqrl'
           if login_session.found?
-            ManualSessions.record(res.server_string, login_session)
+            ManualSessions.sqrl_record(res.server_string, login_session)
           else
-            ManualSessions.record(res.server_string, WebSession.new({'ip' => request.ip}))
+            ManualSessions.sqrl_record(res.server_string, WebSession.new({'ip' => request.ip}))
           end
           status 500
           return res.response_body

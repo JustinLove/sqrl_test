@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module SQRL
   module Test
     class WebSession
@@ -12,6 +14,10 @@ module SQRL
 
       def id
         @session['id']
+      end
+
+      def id=(x)
+        @session['id'] = x
       end
 
       def ip
@@ -48,6 +54,14 @@ module SQRL
 
       def server_string=(ss)
         @session['server_string'] = ss
+      end
+
+      def generate_token
+        @session['token'] = SecureRandom.urlsafe_base64
+      end
+
+      def token
+        @session['token']
       end
 
       def to_h

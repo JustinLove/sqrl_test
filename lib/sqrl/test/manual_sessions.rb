@@ -27,9 +27,25 @@ module SQRL
         WebSession.new(ses)
       end
 
-      def consume(server_string)
+      def sqrl_consume(server_string)
         ses = @@sessions.find {|ses| ses['server_string'] == server_string}
         if ses
+          ses.delete('server_string')
+          WebSession.new(ses)
+        else
+          NullSession
+        end
+      end
+
+      def sqrl_record(server_string, session)
+        session.server_string = server_string
+        save(session)
+      end
+
+      def token_consume(token)
+        ses = @@sessions.find {|ses| ses['token'] == token}
+        if ses
+          ses.delete('token')
           WebSession.new(ses)
         else
           NullSession
@@ -45,11 +61,6 @@ module SQRL
         else
           @@sessions.push(session.to_h)
         end
-      end
-
-      def record(server_string, session)
-        session.server_string = server_string
-        save(session)
       end
     end
   end

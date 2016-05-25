@@ -51,6 +51,7 @@ module SQRL
           end
         end
         login_session.login(account)
+        login_session.unlink if req.opt?('cps')
       end
 
       def query; end

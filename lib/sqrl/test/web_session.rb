@@ -44,6 +44,10 @@ module SQRL
         @session['idk']
       end
 
+      def unlink
+        @session.delete('id')
+      end
+
       def idk
         @session['idk']
       end

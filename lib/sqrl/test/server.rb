@@ -89,7 +89,7 @@ module SQRL
           response.execute_commands
           res = response.response((params[:tif_base] || 16).to_i)
           res.fields['qry'] = '/sqrl'
-          unless req.commands.include?('query')
+          if req.opt?('cps') && !req.commands.include?('query')
             res.fields['url'] = "#{request.base_url}/token/#{login_session.generate_token}"
           end
           if login_session.found?

@@ -27,8 +27,10 @@ module SQRL
 
       get '/' do
         nut = SQRL::OpaqueNut.new.to_s
-        auth_url = SQRL::URL.qrl(request.host+':'+request.port.to_s+'/sqrl', {
-          :nut => nut, :sfn => 'SQRL::Test'}).to_s
+        scheme = request.secure? ? URI::SQRL : URI::QRL
+        auth_url = SQRL::URL.create(scheme,
+          request.host+':'+request.port.to_s+'/sqrl',
+          {:nut => nut, :sfn => 'SQRL::Test'}).to_s
         if params[:tif_base]
           auth_url += '&tif_base=' + params[:tif_base]
         end
@@ -92,6 +94,7 @@ module SQRL
           if req.opt?('cps') && !req.commands.include?('query')
             res.fields['url'] = "#{request.base_url}/token/#{login_session.generate_token}"
           end
+          res.fields['secure'] = request.secure?
           if login_session.found?
             ManualSessions.sqrl_record(res.server_string, login_session)
           else

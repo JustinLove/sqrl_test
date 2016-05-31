@@ -1,0 +1,1 @@
+web: bundle exec thin --ssl --ssl-key-file tmp/server.key --ssl-cert-file tmp/server.crt start --port $PORT

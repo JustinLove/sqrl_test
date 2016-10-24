@@ -96,6 +96,7 @@ module SQRL
         res_nut = SQRL::OpaqueNut.new.to_s
         flag = flags
         fields = {
+          :sin => SecureRandom.hex(16),
           :sfn => 'SQRL::Test',
           :signature_valid => valid?,
           :nut_valid => @login_session.found?,

@@ -104,11 +104,6 @@ module SQRL
         @account_found
       end
 
-      def no_account?
-        errors << "Account already exists" if @account_found
-        !@account_found
-      end
-
       def idk?
         errors << "IDK required" unless req.idk
         !!req.idk
